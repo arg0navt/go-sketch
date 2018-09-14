@@ -1,12 +1,15 @@
 package main
 
 import (
-	"./goSketch"
+	"fmt"
+
+	"./gosketch"
 )
 
 func main() {
-	err := goSketch.GetFiles("./unsplash-app-creativepox.sketch", "dir")
+	i, err := gosketch.Read("./progressive-web-app-onboarding-richcullen.sketch")
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(i)
 }

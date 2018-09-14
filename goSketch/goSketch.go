@@ -1,4 +1,4 @@
-package goSketch
+package gosketch
 
 import (
 	"archive/zip"
@@ -10,7 +10,7 @@ import (
 
 // GetFiles : unzip sketch file
 func GetFiles(src string, dir string) error {
-	r, err := unzip(src, dir)
+	r, err := unzip(src)
 	if err != nil {
 		return err
 	}
@@ -27,10 +27,11 @@ func GetFiles(src string, dir string) error {
 			}
 		}
 	}
+
 	return nil
 }
 
-func unzip(src string, dir string) (*zip.ReadCloser, error) {
+func unzip(src string) (*zip.ReadCloser, error) {
 	r, err := zip.OpenReader(src)
 	if err != nil {
 		return nil, err
