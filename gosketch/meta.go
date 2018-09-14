@@ -8,11 +8,11 @@ type Meta struct {
 	Fonts                []string            `json:"fonts"`
 	CompatibilityVersion string              `json:"compatibilityVersion"`
 	App                  string              `json:"app"`
-	Autosaved            int64               `json:"autosaved"`
+	Autosaved            int                 `json:"autosaved"`
 	Variant              string              `json:"variant"`
 	Created              MetaCreated         `json:"created"`
 	AppVersion           string              `json:"appVersion"`
-	Build                int64               `json:"build"`
+	Build                int                 `json:"build"`
 }
 
 // MetaPage meta.json "pagesAndArtboards"
@@ -30,9 +30,18 @@ type MetaArtboard struct {
 type MetaCreated struct {
 	Commit               string `json:"cpmmit"`
 	AppVersion           string `json:"appVersion"`
-	Build                int64  `json:"build"`
+	Build                int    `json:"build"`
 	App                  string `json:"app"`
-	CompatibilityVersion int64  `json:"compatibilityVersion"`
-	Version              int64  `json:"version"`
+	CompatibilityVersion int    `json:"compatibilityVersion"`
+	Version              int    `json:"version"`
 	Variant              string `json:"variant"`
+}
+
+// PagesList return ID pages
+func (s *SketchFile) PagesList() []string {
+	var result []string
+	for key := range s.Meta.PagesAndArtboards {
+		result = append(result, key)
+	}
+	return result
 }

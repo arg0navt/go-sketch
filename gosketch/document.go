@@ -5,8 +5,8 @@ type Document struct {
 	Class                  string         `json:"_class"`
 	ObjecttID              string         `json:"do_objectID"`
 	Assets                 DocumentAssets `json:"assets"`
-	ColorSpace             int64          `json:"colorSpace"`
-	CurrentPageIndex       int64          `json:"currentPageIndex"`
+	ColorSpace             int            `json:"colorSpace"`
+	CurrentPageIndex       int            `json:"currentPageIndex"`
 	EnableLayerInteraction bool           `json:"enableLayerInteraction"`
 	EnableSliceInteraction bool           `json:"enableSliceInteraction"`
 	Pages                  []DocumentPage `json:"pages"`
@@ -21,7 +21,7 @@ type DocumentAssets struct {
 // DocumentColor documents.json "assets > colors"
 type DocumentColor struct {
 	Class string `json:"_class"`
-	Alpha int64  `json:"alpha"`
+	Alpha int    `json:"alpha"`
 	Blue  int    `json:"blue"`
 	Green int    `json:"green"`
 	Red   int    `json:"red"`

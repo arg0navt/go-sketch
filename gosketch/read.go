@@ -3,12 +3,14 @@ package gosketch
 import (
 	"encoding/json"
 	"io/ioutil"
+	"strings"
 )
 
 //SketchFile informarions of sketch file
 type SketchFile struct {
 	Document Document
 	Meta     Meta
+	Pages    map[string]Page
 }
 
 // Read : It's takes information about sketch and returns json map[]
@@ -18,9 +20,10 @@ func Read(src string) (*SketchFile, error) {
 	if err != nil {
 		return &all, err
 	}
-
+	pagesMap := make(map[string]Page)
 	for _, f := range r.File {
-		if f.Name == "meta.json" || f.Name == "document.json" {
+		formatJSON := strings.HasSuffix(f.Name, ".json")
+		if formatJSON && f.Name != "user.json" {
 			file, err := f.Open()
 			if err != nil {
 				return &all, err
@@ -31,12 +34,26 @@ func Read(src string) (*SketchFile, error) {
 				return &all, err
 			}
 			if f.Name == "meta.json" {
-				json.Unmarshal(byteValue, &all.Document)
-			}
-			if f.Name == "document.json" {
-				json.Unmarshal(byteValue, &all.Meta)
+				var jsonMeta Meta
+				json.Unmarshal(byteValue, &jsonMeta)
+				all.Meta = jsonMeta
+			} else if f.Name == "document.json" {
+				var jsonDocument Document
+				json.Unmarshal(byteValue, &jsonDocument)
+				all.Document = jsonDocument
+			} else {
+				var jsonPage Page
+				json.Unmarshal(byteValue, &jsonPage)
+				keyName := strings.TrimSuffix(f.Name, ".json")
+				keyName = keyName[6:]
+				pagesMap[keyName] = jsonPage
+				//
+				// json.Unmarshal(byteValue, &jsonPage)
+
+				// all.Pages[keyName] = jsonPage
 			}
 		}
 	}
+	all.Pages = pagesMap
 	return &all, nil
 }
