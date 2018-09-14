@@ -11,5 +11,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(i)
+	fmt.Println(i.Document)
 }

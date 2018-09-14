@@ -1,5 +1,6 @@
 package gosketch
 
+// Meta meta.json
 type Meta struct {
 	Commit               string              `json:"commit"`
 	PagesAndArtboards    map[string]MetaPage `json:"pagesAndArtboards"`
@@ -14,15 +15,18 @@ type Meta struct {
 	Build                int64               `json:"build"`
 }
 
+// MetaPage meta.json "pagesAndArtboards"
 type MetaPage struct {
 	Name      string                  `json:"name"`
 	Artboards map[string]MetaArtboard `json:"artboards"`
 }
 
+// MetaArtboard meta.json "pagesAndArtboards > artboards"
 type MetaArtboard struct {
 	Name string
 }
 
+// MetaCreated meta.json "created"
 type MetaCreated struct {
 	Commit               string `json:"cpmmit"`
 	AppVersion           string `json:"appVersion"`

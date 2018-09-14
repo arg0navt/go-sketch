@@ -1,5 +1,6 @@
 package gosketch
 
+// Document document.json
 type Document struct {
 	Class                  string         `json:"_class"`
 	ObjecttID              string         `json:"do_objectID"`
@@ -11,11 +12,13 @@ type Document struct {
 	Pages                  []DocumentPage `json:"pages"`
 }
 
+// DocumentAssets documents.json "assets"
 type DocumentAssets struct {
 	Class  string          `json:"_class"`
 	Colors []DocumentColor `json:"colors"`
 }
 
+// DocumentColor documents.json "assets > colors"
 type DocumentColor struct {
 	Class string `json:"_class"`
 	Alpha int64  `json:"alpha"`
@@ -24,6 +27,7 @@ type DocumentColor struct {
 	Red   int    `json:"red"`
 }
 
+// DocumentPage document.json "pages"
 type DocumentPage struct {
 	Class     string `json:"_class"`
 	RefClsass string `json:"_ref_class"`
