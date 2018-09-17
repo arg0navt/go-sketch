@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"./gosketch"
 )
 
@@ -11,5 +9,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(i.Pages)
+	i.GetCSS("41CC057E-153E-4215-A787-8105A6BE3DE6")
 }
