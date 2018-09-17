@@ -41,9 +41,127 @@ type PageStyle struct {
 	StartDecorationType int    `json:"startDecorationType"`
 }
 
-type Layer struct {
-	Name   string
-	Layers interface{}
+type Color struct {
+	Alpha int
+	Blue  int
+	Green int
+	Red   int
+}
+
+type Border struct {
+	IsEnabled bool
+	Color     Color
+	FillType  int
+	Position  int
+	Thickness int
+}
+
+type GradientStop struct {
+	Color    Color
+	Position int
+}
+
+type Gradient struct {
+	ElipseLength          int
+	From                  string
+	GradientType          int
+	ShouldSmoothenOpacity int
+	Stops                 []string
+	to                    string
+}
+
+type GraphicsContextSettings struct {
+	BlendMode int
+	Opacity   int
+}
+
+type InnerShadow struct {
+	IsEnabled       bool
+	BlurRadius      int
+	Color           Color
+	ContextSettings GraphicsContextSettings
+	OffsetX         int
+	offsetY         int
+	Spread          int
+}
+
+type Fill struct {
+	IsEnabled        bool
+	Color            Color
+	FillType         int
+	Gradient         Gradient
+	NoiseIndex       int
+	NoiseIntensity   int
+	PatternFillType  int
+	PatternTileScale int
+}
+
+type Shadow struct {
+	IsEnabled       bool
+	BlurRadius      int
+	Color           Color
+	ContextSettings GraphicsContextSettings
+	OffsetX         int
+	OffsetY         int
+	Spread          int
+}
+
+type Blur struct {
+	IsEnabled   bool
+	Center      string
+	MotionAngle int
+	Radius      int
+	Type        int
+}
+
+type Rect struct {
+	ConstrainProportions bool
+	Height               int
+	Width                int
+	X                    int
+	Y                    int
+}
+
+type EncodedAttributes struct {
+	NSKern                          int
+	MSAttributedStringFontAttribute map[string]string
+	NSParagraphStyle                map[string]string
+	NSColor                         map[string]string
+}
+
+type TextStyle struct {
+	EncodedAttributes EncodedAttributes
+}
+
+type BorderOptions struct {
+	DoObjectID    string
+	IsEnabled     bool
+	LineCapStyle  int
+	LineJoinStyle int
+}
+
+type ColorControls struct {
+	IsEnabled  bool
+	Brightness int
+	Contrast   int
+	Hue        int
+	Saturation int
+}
+
+type Style struct {
+	Blur                []Blur
+	Borders             []Border
+	BorderOptions       BorderOptions
+	ContextSettings     GraphicsContextSettings
+	ColorControls       ColorControls
+	EndDecorationType   int
+	Folls               []Fill
+	InnerShadows        []InnerShadow
+	MiterLimit          int
+	Shadows             []Shadow
+	SharedObjectID      string
+	StartDecorationType int
+	TextStyle           TextStyle
 }
 
 // GetLyersPage get layers elements by page
