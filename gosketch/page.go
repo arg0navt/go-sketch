@@ -1,6 +1,8 @@
 package gosketch
 
-import "fmt"
+import (
+	"fmt"
+)
 
 //Page jsons from folder pages/
 type Page struct {
@@ -116,10 +118,10 @@ type Blur struct {
 
 type Rect struct {
 	ConstrainProportions bool
-	Height               int
-	Width                int
-	X                    int
-	Y                    int
+	Height               float64
+	Width                float64
+	X                    float64
+	Y                    float64
 }
 
 type EncodedAttributes struct {
@@ -181,7 +183,7 @@ type ExportFormat struct {
 
 type ExportOptions struct {
 	ExportFormats []ExportFormat
-	LayerOptions  int
+	LayerOptions  float64
 	ShouldTrim    bool
 }
 
@@ -293,11 +295,11 @@ type Artboard struct {
 	IsFlippedHorizontal            bool
 	IsLocked                       bool
 	IsVisible                      bool
-	LayerListExpandedType          int
+	LayerListExpandedType          float64
 	Name                           string
 	NameIsFixed                    bool
-	ResizeType                     int
-	Rotation                       int
+	ResizeType                     float64
+	Rotation                       float64
 	ShouldBreakMaskChain           bool
 	Style                          Style
 	HasClickThrough                bool
@@ -450,11 +452,11 @@ func getLayer(l interface{}, count int) {
 	countChildren := count
 	mapLayer, ok := l.(map[string]interface{})
 	if ok {
-		prevText := ""
-		for i := 0; i < countChildren; i++ {
-			prevText = prevText + "> "
+		switch className := mapLayer["_class"].(string); className {
+		case "artboard":
+			a := getArtboard(mapLayer)
+			fmt.Println(a)
 		}
-		fmt.Println(prevText + mapLayer["_class"].(string))
 	}
 	children, okCh := mapLayer["layers"].([]interface{})
 	if okCh {
@@ -472,3 +474,53 @@ func (s *SketchFile) GetCSS(pageID string) {
 		getLayer(l, 0)
 	}
 }
+
+func getArtboard(layer map[string]interface{}) Artboard {
+	eo := getExportOptions(layer["exportOptions"])
+	f := getFrame(layer["frame"])
+	// s := getStyle(layer["style"])
+	return Artboard{
+		DoObjectID:            layer["do_objectID"].(string),
+		ExportOptions:         eo,
+		Frame:                 f,
+		IsFlippedVertical:     layer["isFlippedVertical"].(bool),
+		IsFlippedHorizontal:   layer["isFlippedHorizontal"].(bool),
+		IsLocked:              layer["isLocked"].(bool),
+		IsVisible:             layer["isVisible"].(bool),
+		LayerListExpandedType: layer["layerListExpandedType"].(float64),
+		Name:                 layer["name"].(string),
+		NameIsFixed:          layer["nameIsFixed"].(bool),
+		ResizeType:           layer["resizingType"].(float64),
+		Rotation:             layer["rotation"].(float64),
+		ShouldBreakMaskChain: layer["shouldBreakMaskChain"].(bool),
+	}
+}
+
+func getExportOptions(eo interface{}) ExportOptions {
+	l, ok := eo.(map[string]interface{})
+	if ok {
+		return ExportOptions{
+			LayerOptions: l["layerOptions"].(float64),
+			ShouldTrim:   l["shouldTrim"].(bool),
+		}
+	}
+	return ExportOptions{}
+}
+
+func getFrame(f interface{}) Rect {
+	l, ok := f.(map[string]interface{})
+	if ok {
+		return Rect{
+			ConstrainProportions: l["constrainProportions"].(bool),
+			Height:               l["height"].(float64),
+			Width:                l["width"].(float64),
+			X:                    l["x"].(float64),
+			Y:                    l["y"].(float64),
+		}
+	}
+	return Rect{}
+}
+
+// func getStyle(s interface{}) Style {
+
+// }
