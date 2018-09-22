@@ -422,7 +422,7 @@ type SymbolMaster struct {
 	Frame                            Rect
 	HasBackgroundColor               bool
 	HasClickThrough                  bool
-	horizontalRulerData              RulerData
+	HorizontalRulerData              RulerData
 	IncludeBackgroundColorInExport   bool
 	IncludeBackgroundColorInInstance bool
 	IncludeInCloudUpload             bool
@@ -431,7 +431,7 @@ type SymbolMaster struct {
 	IsLocked                         bool
 	IsVisible                        bool
 	LayerListExpandedType            int
-	layers                           []interface{}
+	Layers                           []interface{}
 	Name                             string
 	NameIsFixed                      bool
 	Rotation                         int
@@ -446,15 +446,21 @@ func (s *SketchFile) GetLyersPage(page string) []interface{} {
 	return s.Pages[page].Layers
 }
 
-func getLayer(l interface{}) {
+func getLayer(l interface{}, count int) {
+	countChildren := count
 	mapLayer, ok := l.(map[string]interface{})
 	if ok {
-		fmt.Println(mapLayer["name"])
+		prevText := ""
+		for i := 0; i < countChildren; i++ {
+			prevText = prevText + "> "
+		}
+		fmt.Println(prevText + mapLayer["_class"].(string))
 	}
 	children, okCh := mapLayer["layers"].([]interface{})
 	if okCh {
+		countChildren++
 		for _, childrenLayer := range children {
-			getLayer(childrenLayer)
+			getLayer(childrenLayer, countChildren)
 		}
 	}
 }
@@ -463,6 +469,6 @@ func getLayer(l interface{}) {
 func (s *SketchFile) GetCSS(pageID string) {
 	page := s.Pages[pageID]
 	for _, l := range page.Layers {
-		getLayer(l)
+		getLayer(l, 0)
 	}
 }
