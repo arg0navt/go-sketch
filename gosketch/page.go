@@ -2,12 +2,12 @@ package gosketch
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
 //Page jsons from folder pages/
 type Page struct {
-	Class                 string        `json:"_class"`
 	ObjectID              string        `json:"do_objectID"`
 	Frame                 PageFrame     `json:"frame"`
 	IsFlippedHorizontal   bool          `json:"isFlippedHorizontal"`
@@ -28,20 +28,18 @@ type Page struct {
 
 //PageFrame jsons from folder pages/ "frame"
 type PageFrame struct {
-	Class                string `json:"_class"`
-	ConstrainProportions bool   `json:"constrainProportions"`
-	Height               int    `json:"height"`
-	Width                int    `json:"width"`
-	X                    int    `json:"x"`
-	Y                    int    `json:"y"`
+	ConstrainProportions bool `json:"constrainProportions"`
+	Height               int  `json:"height"`
+	Width                int  `json:"width"`
+	X                    int  `json:"x"`
+	Y                    int  `json:"y"`
 }
 
 //PageStyle jsons from folder pages/ "style"
 type PageStyle struct {
-	Class               string `json:"_class"`
-	EndDecorationType   int    `json:"endDecorationType"`
-	MiterLimit          int    `json:"miterLimit"`
-	StartDecorationType int    `json:"startDecorationType"`
+	EndDecorationType   int `json:"endDecorationType"`
+	MiterLimit          int `json:"miterLimit"`
+	StartDecorationType int `json:"startDecorationType"`
 }
 
 type Color struct {
@@ -445,9 +443,9 @@ type SymbolMaster struct {
 }
 
 // GetLyersPage get layers elements by page
-func (s *SketchFile) GetLyersPage(page string) []interface{} {
-	return s.Pages[page].Layers
-}
+// func (s *SketchFile) GetLyersPage(page string) []interface{} {
+// 	return s.Pages[page].Layers
+// }
 
 // GetCSS get style css by layrs page
 func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
@@ -459,6 +457,26 @@ func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
 		if err2 != nil {
 			panic(err2)
 		}
+		getLayers(&artboatd)
 		json.NewEncoder(w).Encode(&artboatd)
+	}
+}
+
+func getLayers(a *Artboard) {
+	for index, layer := range a.Layers {
+		l, ok := layer.(map[string]interface{})
+		if ok {
+			var dst interface{}
+			switch l["_class"] {
+			case "group":
+				dst = new(Group)
+			}
+			l, _ := json.Marshal(layer)
+			err := json.Unmarshal(l, dst)
+			if err != nil {
+				log.Fatalln("error:", err)
+			}
+			a.Layers[index] = dst
+		}
 	}
 }
