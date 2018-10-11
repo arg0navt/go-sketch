@@ -1,7 +1,11 @@
 package main
 
 import (
+	"log"
+	"net/http"
+
 	"./gosketch"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -9,5 +13,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	i.GetCSS("41CC057E-153E-4215-A787-8105A6BE3DE6")
+	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/", i.GetCSS)
+	log.Fatal(http.ListenAndServe(":8080", router))
 }

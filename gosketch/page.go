@@ -1,7 +1,8 @@
 package gosketch
 
 import (
-	"fmt"
+	"encoding/json"
+	"net/http"
 )
 
 //Page jsons from folder pages/
@@ -111,9 +112,9 @@ type Shadow struct {
 type Blur struct {
 	IsEnabled   bool
 	Center      string
-	MotionAngle int
-	Radius      int
-	Type        int
+	MotionAngle float64
+	Radius      float64
+	Type        float64
 }
 
 type Rect struct {
@@ -151,7 +152,7 @@ type ColorControls struct {
 }
 
 type Style struct {
-	Blur                []Blur
+	Blur                Blur
 	Borders             []Border
 	BorderOptions       BorderOptions
 	ContextSettings     GraphicsContextSettings
@@ -448,79 +449,16 @@ func (s *SketchFile) GetLyersPage(page string) []interface{} {
 	return s.Pages[page].Layers
 }
 
-func getLayer(l interface{}, count int) {
-	countChildren := count
-	mapLayer, ok := l.(map[string]interface{})
-	if ok {
-		switch className := mapLayer["_class"].(string); className {
-		case "artboard":
-			a := getArtboard(mapLayer)
-			fmt.Println(a)
-		}
-	}
-	children, okCh := mapLayer["layers"].([]interface{})
-	if okCh {
-		countChildren++
-		for _, childrenLayer := range children {
-			getLayer(childrenLayer, countChildren)
-		}
-	}
-}
-
 // GetCSS get style css by layrs page
-func (s *SketchFile) GetCSS(pageID string) {
-	page := s.Pages[pageID]
-	for _, l := range page.Layers {
-		getLayer(l, 0)
-	}
-}
-
-func getArtboard(layer map[string]interface{}) Artboard {
-	eo := getExportOptions(layer["exportOptions"])
-	f := getFrame(layer["frame"])
-	// s := getStyle(layer["style"])
-	return Artboard{
-		DoObjectID:            layer["do_objectID"].(string),
-		ExportOptions:         eo,
-		Frame:                 f,
-		IsFlippedVertical:     layer["isFlippedVertical"].(bool),
-		IsFlippedHorizontal:   layer["isFlippedHorizontal"].(bool),
-		IsLocked:              layer["isLocked"].(bool),
-		IsVisible:             layer["isVisible"].(bool),
-		LayerListExpandedType: layer["layerListExpandedType"].(float64),
-		Name:                 layer["name"].(string),
-		NameIsFixed:          layer["nameIsFixed"].(bool),
-		ResizeType:           layer["resizingType"].(float64),
-		Rotation:             layer["rotation"].(float64),
-		ShouldBreakMaskChain: layer["shouldBreakMaskChain"].(bool),
-	}
-}
-
-func getExportOptions(eo interface{}) ExportOptions {
-	l, ok := eo.(map[string]interface{})
-	if ok {
-		return ExportOptions{
-			LayerOptions: l["layerOptions"].(float64),
-			ShouldTrim:   l["shouldTrim"].(bool),
+func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
+	page := s.Pages["41CC057E-153E-4215-A787-8105A6BE3DE6"]
+	var artboatd Artboard
+	for _, layer := range page.Layers {
+		l, _ := json.Marshal(layer)
+		err2 := json.Unmarshal(l, &artboatd)
+		if err2 != nil {
+			panic(err2)
 		}
+		json.NewEncoder(w).Encode(&artboatd)
 	}
-	return ExportOptions{}
 }
-
-func getFrame(f interface{}) Rect {
-	l, ok := f.(map[string]interface{})
-	if ok {
-		return Rect{
-			ConstrainProportions: l["constrainProportions"].(bool),
-			Height:               l["height"].(float64),
-			Width:                l["width"].(float64),
-			X:                    l["x"].(float64),
-			Y:                    l["y"].(float64),
-		}
-	}
-	return Rect{}
-}
-
-// func getStyle(s interface{}) Style {
-
-// }
