@@ -457,26 +457,48 @@ func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
 		if err2 != nil {
 			panic(err2)
 		}
-		getLayers(&artboatd)
+		getArtboard(&artboatd)
 		json.NewEncoder(w).Encode(&artboatd)
 	}
 }
 
-func getLayers(a *Artboard) {
+func getArtboard(a *Artboard) {
 	for index, layer := range a.Layers {
 		l, ok := layer.(map[string]interface{})
 		if ok {
-			var dst interface{}
+
 			switch l["_class"] {
 			case "group":
-				dst = new(Group)
+				var dst Group
+				l, _ := json.Marshal(layer)
+				err := json.Unmarshal(l, &dst)
+				if err != nil {
+					log.Fatalln("error:", err)
+				}
+				a.Layers[index] = dst
+				getLayers(&dst.Layers)
 			}
-			l, _ := json.Marshal(layer)
-			err := json.Unmarshal(l, dst)
-			if err != nil {
-				log.Fatalln("error:", err)
-			}
-			a.Layers[index] = dst
+
 		}
+	}
+}
+
+func getLayers(l *[]interface{}) {
+	for index, layer := range *l {
+		lMap, ok := layer.(map[string]interface{})
+		if ok {
+			switch lMap["_class"] {
+			case "group":
+				var dst Group
+				lByte, _ := json.Marshal(lMap)
+				err := json.Unmarshal(lByte, &dst)
+				if err != nil {
+					log.Fatalln("error:", err)
+				}
+				(*l)[index] = dst
+				getLayers(&dst.Layers)
+			}
+		}
+
 	}
 }
