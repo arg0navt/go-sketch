@@ -73,7 +73,7 @@ type Gradient struct {
 
 type GraphicsContextSettings struct {
 	BlendMode int
-	Opacity   int
+	Opacity   float64
 }
 
 type InnerShadow struct {
@@ -124,7 +124,7 @@ type Rect struct {
 }
 
 type EncodedAttributes struct {
-	NSKern                          int
+	NSKern                          float64
 	MSAttributedStringFontAttribute map[string]string
 	NSParagraphStyle                map[string]string
 	NSColor                         map[string]string
@@ -135,7 +135,7 @@ type TextStyle struct {
 }
 
 type BorderOptions struct {
-	DoObjectID    string
+	DoObjectID    string `json:"do_objectID"`
 	IsEnabled     bool
 	LineCapStyle  int
 	LineJoinStyle int
@@ -166,7 +166,7 @@ type Style struct {
 }
 
 type SharedStyle struct {
-	DoObjectID string
+	DoObjectID string `json:"do_objectID"`
 	Name       string
 	Value      Style
 }
@@ -200,7 +200,7 @@ type MSAttributedString struct {
 }
 
 type CurvePoint struct {
-	DoObjectID   string
+	DoObjectID   string `json:"do_objectID"`
 	CornerRadius int
 	СurveFrom    string
 	CurveMode    int
@@ -215,7 +215,7 @@ type RulerData struct {
 }
 
 type Text struct {
-	DoObjectID                        string
+	DoObjectID                        string `json:"do_objectID"`
 	ExportOptions                     ExportOptions
 	Frame                             Rect
 	IsFlippedVertical                 bool
@@ -240,7 +240,7 @@ type Text struct {
 }
 
 type ShapeGroup struct {
-	DoObjectID            string
+	DoObjectID            string `json:"do_objectID"`
 	ExportOptions         ExportOptions
 	Frame                 Rect
 	IsFlippedVertical     bool
@@ -268,7 +268,7 @@ type Path struct {
 }
 
 type ShapePath struct {
-	DoObjectID            string
+	DoObjectID            string `json:"do_objectID"`
 	ExportOptions         ExportOptions
 	Frame                 Rect
 	IsFlippedVertical     bool
@@ -287,7 +287,7 @@ type ShapePath struct {
 }
 
 type Artboard struct {
-	DoObjectID                     string
+	DoObjectID                     string `json:"do_objectID"`
 	ExportOptions                  ExportOptions
 	Frame                          Rect
 	IsFlippedVertical              bool
@@ -312,7 +312,7 @@ type Artboard struct {
 }
 
 type Bitmap struct {
-	DoObjectID            string
+	DoObjectID            string `json:"do_objectID"`
 	ExportOptions         ExportOptions
 	Frame                 Rect
 	IsFlippedVertical     bool
@@ -334,7 +334,7 @@ type Bitmap struct {
 }
 
 type SymbolInstance struct {
-	DoObjectID                     string
+	DoObjectID                     string `json:"do_objectID"`
 	ExportOptions                  ExportOptions
 	Frame                          Rect
 	IsFlippedVertical              bool
@@ -353,12 +353,12 @@ type SymbolInstance struct {
 	MasterInfluenceEdgeMaxYPadding int
 	MasterInfluenceEdgeMinXPadding int
 	MasterInfluenceEdgeMinYPadding int
-	SymbolID                       int
+	SymbolID                       string
 	VerticalSpacing                int
 }
 
 type Group struct {
-	DoObjectID            string
+	DoObjectID            string `json:"do_objectID"`
 	ExportOptions         ExportOptions
 	Frame                 Rect
 	IsFlippedVertical     bool
@@ -377,7 +377,7 @@ type Group struct {
 }
 
 type Rectangle struct {
-	DoObjectID                    string
+	DoObjectID                    string `json:"do_objectID"`
 	ExportOptions                 ExportOptions
 	Frame                         Rect
 	IsFlippedVertical             bool
@@ -398,7 +398,7 @@ type Rectangle struct {
 }
 
 type Oval struct {
-	DoObjectID            string
+	DoObjectID            string `json:"do_objectID"`
 	ExportOptions         ExportOptions
 	Frame                 Rect
 	IsFlippedVertical     bool
@@ -418,7 +418,7 @@ type Oval struct {
 
 type SymbolMaster struct {
 	BackgroundColor                  Color
-	DoObjectID                       string
+	DoObjectID                       string `json:"do_objectID"`
 	ExportOptions                    ExportOptions
 	Frame                            Rect
 	HasBackgroundColor               bool
@@ -489,16 +489,47 @@ func getLayers(l *[]interface{}) {
 		if ok {
 			switch lMap["_class"] {
 			case "group":
-				var dst Group
-				lByte, _ := json.Marshal(lMap)
-				err := json.Unmarshal(lByte, &dst)
-				if err != nil {
-					log.Fatalln("error:", err)
-				}
-				(*l)[index] = dst
-				getLayers(&dst.Layers)
+				group := getGroup(&lMap)
+				(*l)[index] = group
+				getLayers(&group.Layers)
+			case "text":
+				text := getText(&lMap)
+				(*l)[index] = text
+			case "symbolInstance":
+				symbol := getSymbol(&lMap)
+				(*l)[index] = symbol
 			}
 		}
 
 	}
+}
+
+func getGroup(layer *map[string]interface{}) Group {
+	var result Group
+	lByte, _ := json.Marshal(layer)
+	err := json.Unmarshal(lByte, &result)
+	if err != nil {
+		log.Fatalln("error:", err)
+	}
+	return result
+}
+
+func getText(layer *map[string]interface{}) Text {
+	var result Text
+	lByte, _ := json.Marshal(layer)
+	err := json.Unmarshal(lByte, &result)
+	if err != nil {
+		log.Fatalln("error:", err)
+	}
+	return result
+}
+
+func getSymbol(layer *map[string]interface{}) SymbolInstance {
+	var result SymbolInstance
+	lByte, _ := json.Marshal(layer)
+	err := json.Unmarshal(lByte, &result)
+	if err != nil {
+		log.Fatalln("error:", err)
+	}
+	return result
 }
