@@ -3,6 +3,7 @@ package gosketch
 import (
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
 	"strings"
 )
 
@@ -14,24 +15,24 @@ type SketchFile struct {
 }
 
 // Read : It's takes information about sketch and returns json map[]
-func Read(src string) (*SketchFile, error) {
+func Read(w http.ResponseWriter, r *http.Request) {
 	var all SketchFile
-	r, err := unzip(src)
+	re, err := unzip("./progressive-web-app-onboarding-richcullen.sketch")
 	if err != nil {
-		return &all, err
+		panic(err)
 	}
 	pagesMap := make(map[string]Page)
-	for _, f := range r.File {
+	for _, f := range re.File {
 		formatJSON := strings.HasSuffix(f.Name, ".json")
 		if formatJSON && f.Name != "user.json" {
 			file, err := f.Open()
 			if err != nil {
-				return &all, err
+				panic(err)
 			}
 			defer file.Close()
 			byteValue, err := ioutil.ReadAll(file)
 			if err != nil {
-				return &all, err
+				panic(err)
 			}
 			if f.Name == "meta.json" {
 				var jsonMeta Meta
@@ -47,13 +48,9 @@ func Read(src string) (*SketchFile, error) {
 				keyName := strings.TrimSuffix(f.Name, ".json")
 				keyName = keyName[6:]
 				pagesMap[keyName] = jsonPage
-				//
-				// json.Unmarshal(byteValue, &jsonPage)
-
-				// all.Pages[keyName] = jsonPage
 			}
 		}
 	}
 	all.Pages = pagesMap
-	return &all, nil
+	json.NewEncoder(w).Encode(&all)
 }

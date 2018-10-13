@@ -448,7 +448,7 @@ type SymbolMaster struct {
 // }
 
 // GetCSS get style css by layrs page
-func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
+func (s *SketchFile) GetPageLayers(w http.ResponseWriter, r *http.Request) {
 	page := s.Pages["41CC057E-153E-4215-A787-8105A6BE3DE6"]
 	var artboatd Artboard
 	for _, layer := range page.Layers {

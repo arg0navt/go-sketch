@@ -9,11 +9,7 @@ import (
 )
 
 func main() {
-	i, err := gosketch.Read("./progressive-web-app-onboarding-richcullen.sketch")
-	if err != nil {
-		panic(err)
-	}
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/", i.GetCSS)
+	router.HandleFunc("/", gosketch.Read)
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
