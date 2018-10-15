@@ -3,6 +3,7 @@ package gosketch
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -47,10 +48,121 @@ func Read(w http.ResponseWriter, r *http.Request) {
 				json.Unmarshal(byteValue, &jsonPage)
 				keyName := strings.TrimSuffix(f.Name, ".json")
 				keyName = keyName[6:]
-				pagesMap[keyName] = jsonPage
+				go getPageLayers(jsonPage)
+				// pagesMap[keyName] = jsonPage
 			}
 		}
 	}
 	all.Pages = pagesMap
 	json.NewEncoder(w).Encode(&all)
+}
+
+func getLayers(layers []map[string]interface{}) {
+	for index, layer := range layers {
+		switch layer["_class"] {
+		case "artboard":
+			a := getArtboard(&layer)
+			layers[index] = a
+		case "group":
+			g := getGroup(lMap)
+			page.Layers[index] = g
+		case "text":
+			t := getText(lMap)
+			page.Layers[index] = t
+		case "symbolInstance":
+			s := getSymbol(lMap)
+			page.Layers[index] = s
+		}
+		// l, _ := json.Marshal(layer)
+		// err2 := json.Unmarshal(l)
+		// if err2 != nil {
+		// 	panic(err2)
+		// }
+	}
+	// var artboatd Artboard
+
+	// 	getArtboard(&artboatd)
+	// }
+}
+
+func getArtboard(layer *map[string]interface{}) Artboard {
+	var result Artboard
+	lByte, _ := json.Marshal(layer)
+	err := json.Unmarshal(lByte, &result)
+	if err != nil {
+		log.Fatalln("error:", err)
+	}
+	return result
+}
+
+// func getArtboard(a *Artboard) {
+// 	for index, layer := range a.Layers {
+//
+// 		if ok {
+
+// 			switch l["_class"] {
+// 			case "group":
+// 				var dst Group
+// 				l, _ := json.Marshal(layer)
+// 				err := json.Unmarshal(l, &dst)
+// 				if err != nil {
+// 					log.Fatalln("error:", err)
+// 				}
+// 				a.Layers[index] = dst
+// 				getLayers(&dst.Layers)
+// 			}
+
+// 		}
+// 	}
+// }
+
+// func getLayers(l *[]interface{}) {
+// 	for index, layer := range *l {
+// 		lMap, ok := layer.(map[string]interface{})
+// 		if ok {
+// 			switch lMap["_class"] {
+// 			case "group":
+// 				group := getGroup(&lMap)
+// 				(*l)[index] = group
+// 				getLayers(&group.Layers)
+// 			case "text":
+// 				text := getText(&lMap)
+// 				(*l)[index] = text
+// 			case "symbolInstance":
+// 				symbol := getSymbol(&lMap)
+// 				(*l)[index] = symbol
+// 			}
+// 		}
+
+// 	}
+// }
+
+func getGroup(layer *map[string]interface{}) Group {
+	var result Group
+	lByte, _ := json.Marshal(layer)
+	err := json.Unmarshal(lByte, &result)
+	if err != nil {
+		log.Fatalln("error:", err)
+	}
+	return result
+}
+
+func getText(layer *map[string]interface{}) Text {
+	var result Text
+	lByte, _ := json.Marshal(layer)
+	err := json.Unmarshal(lByte, &result)
+	if err != nil {
+		log.Fatalln("error:", err)
+	}
+	return result
+}
+
+func getSymbol(layer *map[string]interface{}) SymbolInstance {
+	var result SymbolInstance
+	lByte, _ := json.Marshal(layer)
+	err := json.Unmarshal(lByte, &result)
+	if err != nil {
+		log.Fatalln("error:", err)
+	}
+	return result
 }

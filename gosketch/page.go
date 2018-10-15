@@ -1,29 +1,23 @@
 package gosketch
 
-import (
-	"encoding/json"
-	"log"
-	"net/http"
-)
-
 //Page jsons from folder pages/
 type Page struct {
-	ObjectID              string        `json:"do_objectID"`
-	Frame                 PageFrame     `json:"frame"`
-	IsFlippedHorizontal   bool          `json:"isFlippedHorizontal"`
-	IsFlippedVertical     bool          `json:"isFlippedVertical"`
-	IsLocked              bool          `json:"isLocked"`
-	IsVisible             bool          `json:"isVisible"`
-	LayerListExpandedType int           `json:"layerListExpandedType"`
-	Name                  string        `json:"name"`
-	NameIsFixed           bool          `json:"nameIsFixed"`
-	ResizingConstraint    int           `json:"resizingConstraint"`
-	ResizingType          int           `json:"resizingType"`
-	Rotation              int           `json:"rotation"`
-	ShouldBreakMaskChain  bool          `json:"shouldBreakMaskChain"`
-	Style                 PageStyle     `json:"style"`
-	HasClickThrough       bool          `json:"hasClickThrough"`
-	Layers                []interface{} `json:"layers"`
+	ObjectID              string                   `json:"do_objectID"`
+	Frame                 PageFrame                `json:"frame"`
+	IsFlippedHorizontal   bool                     `json:"isFlippedHorizontal"`
+	IsFlippedVertical     bool                     `json:"isFlippedVertical"`
+	IsLocked              bool                     `json:"isLocked"`
+	IsVisible             bool                     `json:"isVisible"`
+	LayerListExpandedType int                      `json:"layerListExpandedType"`
+	Name                  string                   `json:"name"`
+	NameIsFixed           bool                     `json:"nameIsFixed"`
+	ResizingConstraint    int                      `json:"resizingConstraint"`
+	ResizingType          int                      `json:"resizingType"`
+	Rotation              int                      `json:"rotation"`
+	ShouldBreakMaskChain  bool                     `json:"shouldBreakMaskChain"`
+	Style                 PageStyle                `json:"style"`
+	HasClickThrough       bool                     `json:"hasClickThrough"`
+	Layers                []map[string]interface{} `json:"layers"`
 }
 
 //PageFrame jsons from folder pages/ "frame"
@@ -448,88 +442,3 @@ type SymbolMaster struct {
 // }
 
 // GetCSS get style css by layrs page
-func (s *SketchFile) GetPageLayers(w http.ResponseWriter, r *http.Request) {
-	page := s.Pages["41CC057E-153E-4215-A787-8105A6BE3DE6"]
-	var artboatd Artboard
-	for _, layer := range page.Layers {
-		l, _ := json.Marshal(layer)
-		err2 := json.Unmarshal(l, &artboatd)
-		if err2 != nil {
-			panic(err2)
-		}
-		getArtboard(&artboatd)
-		json.NewEncoder(w).Encode(&artboatd)
-	}
-}
-
-func getArtboard(a *Artboard) {
-	for index, layer := range a.Layers {
-		l, ok := layer.(map[string]interface{})
-		if ok {
-
-			switch l["_class"] {
-			case "group":
-				var dst Group
-				l, _ := json.Marshal(layer)
-				err := json.Unmarshal(l, &dst)
-				if err != nil {
-					log.Fatalln("error:", err)
-				}
-				a.Layers[index] = dst
-				getLayers(&dst.Layers)
-			}
-
-		}
-	}
-}
-
-func getLayers(l *[]interface{}) {
-	for index, layer := range *l {
-		lMap, ok := layer.(map[string]interface{})
-		if ok {
-			switch lMap["_class"] {
-			case "group":
-				group := getGroup(&lMap)
-				(*l)[index] = group
-				getLayers(&group.Layers)
-			case "text":
-				text := getText(&lMap)
-				(*l)[index] = text
-			case "symbolInstance":
-				symbol := getSymbol(&lMap)
-				(*l)[index] = symbol
-			}
-		}
-
-	}
-}
-
-func getGroup(layer *map[string]interface{}) Group {
-	var result Group
-	lByte, _ := json.Marshal(layer)
-	err := json.Unmarshal(lByte, &result)
-	if err != nil {
-		log.Fatalln("error:", err)
-	}
-	return result
-}
-
-func getText(layer *map[string]interface{}) Text {
-	var result Text
-	lByte, _ := json.Marshal(layer)
-	err := json.Unmarshal(lByte, &result)
-	if err != nil {
-		log.Fatalln("error:", err)
-	}
-	return result
-}
-
-func getSymbol(layer *map[string]interface{}) SymbolInstance {
-	var result SymbolInstance
-	lByte, _ := json.Marshal(layer)
-	err := json.Unmarshal(lByte, &result)
-	if err != nil {
-		log.Fatalln("error:", err)
-	}
-	return result
-}
