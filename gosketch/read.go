@@ -2,9 +2,8 @@ package gosketch
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
-	"log"
-	"net/http"
 	"strings"
 )
 
@@ -16,11 +15,11 @@ type SketchFile struct {
 }
 
 // Read : It's takes information about sketch and returns json map[]
-func Read(w http.ResponseWriter, r *http.Request) {
+func Read(path string) (*SketchFile, error) {
 	var all SketchFile
-	re, err := unzip("./progressive-web-app-onboarding-richcullen.sketch")
+	re, err := unzip(path)
 	if err != nil {
-		panic(err)
+		return &all, err
 	}
 	pagesMap := make(map[string]Page)
 	for _, f := range re.File {
@@ -28,12 +27,12 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		if formatJSON && f.Name != "user.json" {
 			file, err := f.Open()
 			if err != nil {
-				panic(err)
+				return &all, nil
 			}
 			defer file.Close()
 			byteValue, err := ioutil.ReadAll(file)
 			if err != nil {
-				panic(err)
+				return &all, nil
 			}
 			if f.Name == "meta.json" {
 				var jsonMeta Meta
@@ -54,83 +53,118 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	all.Pages = pagesMap
-	json.NewEncoder(w).Encode(&all)
+	return &all, nil
 }
 
-func getLayers(layers *[]interface{}) {
+func getLayers(layers *[]interface{}) error {
 	for index, layer := range *layers {
 		lMap, ok := layer.(map[string]interface{})
 		if ok {
 			switch lMap["_class"] {
 			case "artboard":
-				a := getArtboard(&lMap)
+				a, err := getArtboard(&lMap)
+				if err != nil {
+					return err
+				}
 				getLayers(&a.Layers)
 				(*layers)[index] = a
 			case "group":
-				g := getGroup(&lMap)
+				g, err := getGroup(&lMap)
+				if err != nil {
+					return err
+				}
 				getLayers(&g.Layers)
 				(*layers)[index] = g
+			case "shapeGroup":
+				sG, err := getShapeGroup(&lMap)
+				if err != nil {
+					return err
+				}
+				getLayers(&sG.Layers)
+				(*layers)[index] = sG
 			case "text":
-				t := getText(&lMap)
+				t, err := getText(&lMap)
+				if err != nil {
+					return err
+				}
 				(*layers)[index] = t
 			case "symbolInstance":
-				sI := getSymbolInstance(&lMap)
+				sI, err := getSymbolInstance(&lMap)
+				if err != nil {
+					return err
+				}
 				(*layers)[index] = sI
 			case "symbolMaster":
-				sM := getSymbolMaster(&lMap)
+				sM, err := getSymbolMaster(&lMap)
+				if err != nil {
+					return err
+				}
 				getLayers(&sM.Layers)
 				(*layers)[index] = sM
 			}
+		} else {
+			return errors.New("not type is map")
 		}
 	}
+	return nil
 }
 
-func getArtboard(layer *map[string]interface{}) Artboard {
+func getArtboard(layer *map[string]interface{}) (Artboard, error) {
 	var result Artboard
 	lByte, _ := json.Marshal(layer)
 	err := json.Unmarshal(lByte, &result)
 	if err != nil {
-		log.Fatalln("error:", err)
+		return result, err
 	}
-	return result
+	return result, nil
 }
 
-func getGroup(layer *map[string]interface{}) Group {
+func getGroup(layer *map[string]interface{}) (Group, error) {
 	var result Group
 	lByte, _ := json.Marshal(layer)
 	err := json.Unmarshal(lByte, &result)
 	if err != nil {
-		log.Fatalln("error:", err)
+		return result, err
 	}
-	return result
+	return result, nil
 }
 
-func getText(layer *map[string]interface{}) Text {
+func getShapeGroup(layer *map[string]interface{}) (ShapeGroup, error) {
+	var result ShapeGroup
+	lByte, _ := json.Marshal(layer)
+	err := json.Unmarshal(lByte, &result)
+	if err != nil {
+		return result, err
+	}
+	return result, nil
+}
+
+func getText(layer *map[string]interface{}) (Text, error) {
 	var result Text
 	lByte, _ := json.Marshal(layer)
 	err := json.Unmarshal(lByte, &result)
 	if err != nil {
-		log.Fatalln("error:", err)
+		return result, err
 	}
-	return result
+	return result, nil
 }
 
-func getSymbolInstance(layer *map[string]interface{}) SymbolInstance {
+func getSymbolInstance(layer *map[string]interface{}) (SymbolInstance, error) {
 	var result SymbolInstance
 	lByte, _ := json.Marshal(layer)
 	err := json.Unmarshal(lByte, &result)
 	if err != nil {
-		log.Fatalln("error:", err)
+		return result, err
 	}
-	return result
+	return result, nil
 }
 
-func getSymbolMaster(layer *map[string]interface{}) SymbolMaster {
+func getSymbolMaster(layer *map[string]interface{}) (SymbolMaster, error) {
 	var result SymbolMaster
 	lByte, _ := json.Marshal(layer)
 	err := json.Unmarshal(lByte, &result)
 	if err != nil {
-		log.Fatalln("error:", err)
+		return result, err
 	}
-	return result
+	return result, nil
 }

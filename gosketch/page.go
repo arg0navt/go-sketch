@@ -1,5 +1,10 @@
 package gosketch
 
+import (
+	"encoding/json"
+	"net/http"
+)
+
 //Page jsons from folder pages/
 type Page struct {
 	ObjectID              string `json:"Do_objectID"`
@@ -37,10 +42,10 @@ type PageStyle struct {
 }
 
 type Color struct {
-	Alpha int
-	Blue  int
-	Green int
-	Red   int
+	Alpha float64
+	Blue  float64
+	Green float64
+	Red   float64
 }
 
 type Border struct {
@@ -76,7 +81,7 @@ type InnerShadow struct {
 	Color           Color
 	ContextSettings GraphicsContextSettings
 	OffsetX         int
-	offsetY         int
+	OffsetY         int
 	Spread          int
 }
 
@@ -118,10 +123,7 @@ type Rect struct {
 }
 
 type EncodedAttributes struct {
-	NSKern                          float64
-	MSAttributedStringFontAttribute map[string]string
-	NSParagraphStyle                map[string]string
-	NSColor                         map[string]string
+	NSKern float64
 }
 
 type TextStyle struct {
@@ -209,6 +211,7 @@ type RulerData struct {
 }
 
 type Text struct {
+	Class                             string `json:"_class"`
 	DoObjectID                        string `json:"Do_objectID"`
 	ExportOptions                     ExportOptions
 	Frame                             Rect
@@ -234,6 +237,7 @@ type Text struct {
 }
 
 type ShapeGroup struct {
+	Class                 string `json:"_class"`
 	DoObjectID            string `json:"Do_objectID"`
 	ExportOptions         ExportOptions
 	Frame                 Rect
@@ -281,6 +285,7 @@ type ShapePath struct {
 }
 
 type Artboard struct {
+	Class                          string `json:"_class"`
 	DoObjectID                     string `json:"Do_objectID"`
 	ExportOptions                  ExportOptions
 	Frame                          Rect
@@ -328,6 +333,7 @@ type Bitmap struct {
 }
 
 type SymbolInstance struct {
+	Class                          string `json:"_class"`
 	DoObjectID                     string `json:"Do_objectID"`
 	ExportOptions                  ExportOptions
 	Frame                          Rect
@@ -352,6 +358,7 @@ type SymbolInstance struct {
 }
 
 type Group struct {
+	Class                 string `json:"_class"`
 	DoObjectID            string `json:"Do_objectID"`
 	ExportOptions         ExportOptions
 	Frame                 Rect
@@ -371,6 +378,7 @@ type Group struct {
 }
 
 type Rectangle struct {
+	Class                         string `json:"_class"`
 	DoObjectID                    string `json:"Do_objectID"`
 	ExportOptions                 ExportOptions
 	Frame                         Rect
@@ -392,6 +400,7 @@ type Rectangle struct {
 }
 
 type Oval struct {
+	Class                 string `json:"_class"`
 	DoObjectID            string `json:"Do_objectID"`
 	ExportOptions         ExportOptions
 	Frame                 Rect
@@ -411,6 +420,7 @@ type Oval struct {
 }
 
 type SymbolMaster struct {
+	Class                            string `json:"_class"`
 	BackgroundColor                  Color
 	DoObjectID                       string `json:"Do_objectID"`
 	ExportOptions                    ExportOptions
@@ -426,7 +436,7 @@ type SymbolMaster struct {
 	IsLocked                         bool
 	IsVisible                        bool
 	LayerListExpandedType            int
-	Layers                           []interface{} `json:"layers"`
+	Layers                           []interface{}
 	Name                             string
 	NameIsFixed                      bool
 	Rotation                         int
@@ -442,3 +452,6 @@ type SymbolMaster struct {
 // }
 
 // GetCSS get style css by layrs page
+func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(s.Pages)
+}
