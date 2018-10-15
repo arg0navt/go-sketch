@@ -2,29 +2,28 @@ package gosketch
 
 // Document document.json
 type Document struct {
-	Class                  string         `json:"_class"`
-	ObjecttID              string         `json:"do_objectID"`
-	Assets                 DocumentAssets `json:"assets"`
-	ColorSpace             int            `json:"colorSpace"`
-	CurrentPageIndex       int            `json:"currentPageIndex"`
-	EnableLayerInteraction bool           `json:"enableLayerInteraction"`
-	EnableSliceInteraction bool           `json:"enableSliceInteraction"`
-	Pages                  []DocumentPage `json:"pages"`
+	ObjecttID              string `json:"Do_objectID"`
+	Assets                 DocumentAssets
+	ColorSpace             int
+	CurrentPageIndex       int
+	EnableLayerInteraction bool
+	EnableSliceInteraction bool
+	Pages                  []DocumentPage
 }
 
 // DocumentAssets documents.json "assets"
 type DocumentAssets struct {
-	Class  string          `json:"_class"`
-	Colors []DocumentColor `json:"colors"`
+	Class  string `json:"_class"`
+	Colors []DocumentColor
 }
 
 // DocumentColor documents.json "assets > colors"
 type DocumentColor struct {
 	Class string `json:"_class"`
-	Alpha int    `json:"alpha"`
-	Blue  int    `json:"blue"`
-	Green int    `json:"green"`
-	Red   int    `json:"red"`
+	Alpha int
+	Blue  int
+	Green int
+	Red   int
 }
 
 // DocumentPage document.json "pages"

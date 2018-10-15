@@ -2,7 +2,7 @@ package gosketch
 
 //Page jsons from folder pages/
 type Page struct {
-	ObjectID              string `json:"do_objectID"`
+	ObjectID              string `json:"Do_objectID"`
 	Frame                 PageFrame
 	IsFlippedHorizontal   bool
 	IsFlippedVertical     bool
@@ -129,7 +129,7 @@ type TextStyle struct {
 }
 
 type BorderOptions struct {
-	DoObjectID    string `json:"do_objectID"`
+	DoObjectID    string `json:"Do_objectID"`
 	IsEnabled     bool
 	LineCapStyle  int
 	LineJoinStyle int
@@ -160,7 +160,7 @@ type Style struct {
 }
 
 type SharedStyle struct {
-	DoObjectID string `json:"do_objectID"`
+	DoObjectID string `json:"Do_objectID"`
 	Name       string
 	Value      Style
 }
@@ -194,7 +194,7 @@ type MSAttributedString struct {
 }
 
 type CurvePoint struct {
-	DoObjectID   string `json:"do_objectID"`
+	DoObjectID   string `json:"Do_objectID"`
 	CornerRadius int
 	СurveFrom    string
 	CurveMode    int
@@ -209,7 +209,7 @@ type RulerData struct {
 }
 
 type Text struct {
-	DoObjectID                        string `json:"do_objectID"`
+	DoObjectID                        string `json:"Do_objectID"`
 	ExportOptions                     ExportOptions
 	Frame                             Rect
 	IsFlippedVertical                 bool
@@ -234,7 +234,7 @@ type Text struct {
 }
 
 type ShapeGroup struct {
-	DoObjectID            string `json:"do_objectID"`
+	DoObjectID            string `json:"Do_objectID"`
 	ExportOptions         ExportOptions
 	Frame                 Rect
 	IsFlippedVertical     bool
@@ -281,7 +281,7 @@ type ShapePath struct {
 }
 
 type Artboard struct {
-	DoObjectID                     string `json:"do_objectID"`
+	DoObjectID                     string `json:"Do_objectID"`
 	ExportOptions                  ExportOptions
 	Frame                          Rect
 	IsFlippedVertical              bool
@@ -328,7 +328,7 @@ type Bitmap struct {
 }
 
 type SymbolInstance struct {
-	DoObjectID                     string `json:"do_objectID"`
+	DoObjectID                     string `json:"Do_objectID"`
 	ExportOptions                  ExportOptions
 	Frame                          Rect
 	IsFlippedVertical              bool
@@ -352,7 +352,7 @@ type SymbolInstance struct {
 }
 
 type Group struct {
-	DoObjectID            string `json:"do_objectID"`
+	DoObjectID            string `json:"Do_objectID"`
 	ExportOptions         ExportOptions
 	Frame                 Rect
 	IsFlippedVertical     bool
@@ -371,7 +371,7 @@ type Group struct {
 }
 
 type Rectangle struct {
-	DoObjectID                    string `json:"do_objectID"`
+	DoObjectID                    string `json:"Do_objectID"`
 	ExportOptions                 ExportOptions
 	Frame                         Rect
 	IsFlippedVertical             bool
@@ -392,7 +392,7 @@ type Rectangle struct {
 }
 
 type Oval struct {
-	DoObjectID            string `json:"do_objectID"`
+	DoObjectID            string `json:"Do_objectID"`
 	ExportOptions         ExportOptions
 	Frame                 Rect
 	IsFlippedVertical     bool
@@ -412,7 +412,7 @@ type Oval struct {
 
 type SymbolMaster struct {
 	BackgroundColor                  Color
-	DoObjectID                       string `json:"do_objectID"`
+	DoObjectID                       string `json:"Do_objectID"`
 	ExportOptions                    ExportOptions
 	Frame                            Rect
 	HasBackgroundColor               bool
@@ -426,7 +426,7 @@ type SymbolMaster struct {
 	IsLocked                         bool
 	IsVisible                        bool
 	LayerListExpandedType            int
-	Layers                           []interface{}
+	Layers                           []interface{} `json:"layers"`
 	Name                             string
 	NameIsFixed                      bool
 	Rotation                         int

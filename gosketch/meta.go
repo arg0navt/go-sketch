@@ -2,23 +2,23 @@ package gosketch
 
 // Meta meta.json
 type Meta struct {
-	Commit               string              `json:"commit"`
-	PagesAndArtboards    map[string]MetaPage `json:"pagesAndArtboards"`
-	Version              int                 `json:"version"`
-	Fonts                []string            `json:"fonts"`
-	CompatibilityVersion string              `json:"compatibilityVersion"`
-	App                  string              `json:"app"`
-	Autosaved            int                 `json:"autosaved"`
-	Variant              string              `json:"variant"`
-	Created              MetaCreated         `json:"created"`
-	AppVersion           string              `json:"appVersion"`
-	Build                int                 `json:"build"`
+	Commit               string
+	PagesAndArtboards    map[string]MetaPage
+	Version              int
+	Fonts                []string
+	CompatibilityVersion string
+	App                  string
+	Autosaved            int
+	Variant              string
+	Created              MetaCreated
+	AppVersion           string
+	Build                int
 }
 
 // MetaPage meta.json "pagesAndArtboards"
 type MetaPage struct {
-	Name      string                  `json:"name"`
-	Artboards map[string]MetaArtboard `json:"artboards"`
+	Name      string
+	Artboards map[string]MetaArtboard
 }
 
 // MetaArtboard meta.json "pagesAndArtboards > artboards"
@@ -28,13 +28,13 @@ type MetaArtboard struct {
 
 // MetaCreated meta.json "created"
 type MetaCreated struct {
-	Commit               string `json:"cpmmit"`
-	AppVersion           string `json:"appVersion"`
-	Build                int    `json:"build"`
-	App                  string `json:"app"`
-	CompatibilityVersion int    `json:"compatibilityVersion"`
-	Version              int    `json:"version"`
-	Variant              string `json:"variant"`
+	Commit               string
+	AppVersion           string
+	Build                int
+	App                  string
+	CompatibilityVersion int
+	Version              int
+	Variant              string
 }
 
 // PagesList return ID pages

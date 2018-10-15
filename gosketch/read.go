@@ -74,8 +74,12 @@ func getLayers(layers *[]interface{}) {
 				t := getText(&lMap)
 				(*layers)[index] = t
 			case "symbolInstance":
-				s := getSymbol(&lMap)
-				(*layers)[index] = s
+				sI := getSymbolInstance(&lMap)
+				(*layers)[index] = sI
+			case "symbolMaster":
+				sM := getSymbolMaster(&lMap)
+				getLayers(&sM.Layers)
+				(*layers)[index] = sM
 			}
 		}
 	}
@@ -111,8 +115,18 @@ func getText(layer *map[string]interface{}) Text {
 	return result
 }
 
-func getSymbol(layer *map[string]interface{}) SymbolInstance {
+func getSymbolInstance(layer *map[string]interface{}) SymbolInstance {
 	var result SymbolInstance
+	lByte, _ := json.Marshal(layer)
+	err := json.Unmarshal(lByte, &result)
+	if err != nil {
+		log.Fatalln("error:", err)
+	}
+	return result
+}
+
+func getSymbolMaster(layer *map[string]interface{}) SymbolMaster {
+	var result SymbolMaster
 	lByte, _ := json.Marshal(layer)
 	err := json.Unmarshal(lByte, &result)
 	if err != nil {
