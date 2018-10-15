@@ -3,6 +3,7 @@ package gosketch
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 )
 
 type PageCss struct {
@@ -78,5 +79,9 @@ func getStyleArtboard(a Artboard, result *[]interface{}) {
 }
 
 func getFormatsColor(c Color) ColorCss {
-	return ColorCss{}
+	r := strconv.Itoa(int(c.Red * 255))
+	g := strconv.Itoa(int(c.Green * 255))
+	b := strconv.Itoa(int(c.Blue * 255))
+	a := strconv.FormatFloat(c.Alpha, 'f', 2, 64)
+	return ColorCss{RGBA: "rgba(" + r + ", " + g + ", " + b + ", " + a + ")"}
 }
