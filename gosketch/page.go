@@ -2,38 +2,38 @@ package gosketch
 
 //Page jsons from folder pages/
 type Page struct {
-	ObjectID              string                   `json:"do_objectID"`
-	Frame                 PageFrame                `json:"frame"`
-	IsFlippedHorizontal   bool                     `json:"isFlippedHorizontal"`
-	IsFlippedVertical     bool                     `json:"isFlippedVertical"`
-	IsLocked              bool                     `json:"isLocked"`
-	IsVisible             bool                     `json:"isVisible"`
-	LayerListExpandedType int                      `json:"layerListExpandedType"`
-	Name                  string                   `json:"name"`
-	NameIsFixed           bool                     `json:"nameIsFixed"`
-	ResizingConstraint    int                      `json:"resizingConstraint"`
-	ResizingType          int                      `json:"resizingType"`
-	Rotation              int                      `json:"rotation"`
-	ShouldBreakMaskChain  bool                     `json:"shouldBreakMaskChain"`
-	Style                 PageStyle                `json:"style"`
-	HasClickThrough       bool                     `json:"hasClickThrough"`
-	Layers                []map[string]interface{} `json:"layers"`
+	ObjectID              string `json:"do_objectID"`
+	Frame                 PageFrame
+	IsFlippedHorizontal   bool
+	IsFlippedVertical     bool
+	IsLocked              bool
+	IsVisible             bool
+	LayerListExpandedType int
+	Name                  string
+	NameIsFixed           bool
+	ResizingConstraint    int
+	ResizingType          int
+	Rotation              int
+	ShouldBreakMaskChain  bool
+	Style                 PageStyle
+	HasClickThrough       bool
+	Layers                []interface{}
 }
 
 //PageFrame jsons from folder pages/ "frame"
 type PageFrame struct {
-	ConstrainProportions bool `json:"constrainProportions"`
-	Height               int  `json:"height"`
-	Width                int  `json:"width"`
-	X                    int  `json:"x"`
-	Y                    int  `json:"y"`
+	ConstrainProportions bool
+	Height               int
+	Width                int
+	X                    int
+	Y                    int
 }
 
 //PageStyle jsons from folder pages/ "style"
 type PageStyle struct {
-	EndDecorationType   int `json:"endDecorationType"`
-	MiterLimit          int `json:"miterLimit"`
-	StartDecorationType int `json:"startDecorationType"`
+	EndDecorationType   int
+	MiterLimit          int
+	StartDecorationType int
 }
 
 type Color struct {

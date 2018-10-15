@@ -48,8 +48,8 @@ func Read(w http.ResponseWriter, r *http.Request) {
 				json.Unmarshal(byteValue, &jsonPage)
 				keyName := strings.TrimSuffix(f.Name, ".json")
 				keyName = keyName[6:]
-				go getPageLayers(jsonPage)
-				// pagesMap[keyName] = jsonPage
+				getLayers(&jsonPage.Layers)
+				pagesMap[keyName] = jsonPage
 			}
 		}
 	}
@@ -57,32 +57,28 @@ func Read(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(&all)
 }
 
-func getLayers(layers []map[string]interface{}) {
-	for index, layer := range layers {
-		switch layer["_class"] {
-		case "artboard":
-			a := getArtboard(&layer)
-			layers[index] = a
-		case "group":
-			g := getGroup(lMap)
-			page.Layers[index] = g
-		case "text":
-			t := getText(lMap)
-			page.Layers[index] = t
-		case "symbolInstance":
-			s := getSymbol(lMap)
-			page.Layers[index] = s
+func getLayers(layers *[]interface{}) {
+	for index, layer := range *layers {
+		lMap, ok := layer.(map[string]interface{})
+		if ok {
+			switch lMap["_class"] {
+			case "artboard":
+				a := getArtboard(&lMap)
+				getLayers(&a.Layers)
+				(*layers)[index] = a
+			case "group":
+				g := getGroup(&lMap)
+				getLayers(&g.Layers)
+				(*layers)[index] = g
+			case "text":
+				t := getText(&lMap)
+				(*layers)[index] = t
+			case "symbolInstance":
+				s := getSymbol(&lMap)
+				(*layers)[index] = s
+			}
 		}
-		// l, _ := json.Marshal(layer)
-		// err2 := json.Unmarshal(l)
-		// if err2 != nil {
-		// 	panic(err2)
-		// }
 	}
-	// var artboatd Artboard
-
-	// 	getArtboard(&artboatd)
-	// }
 }
 
 func getArtboard(layer *map[string]interface{}) Artboard {
@@ -94,48 +90,6 @@ func getArtboard(layer *map[string]interface{}) Artboard {
 	}
 	return result
 }
-
-// func getArtboard(a *Artboard) {
-// 	for index, layer := range a.Layers {
-//
-// 		if ok {
-
-// 			switch l["_class"] {
-// 			case "group":
-// 				var dst Group
-// 				l, _ := json.Marshal(layer)
-// 				err := json.Unmarshal(l, &dst)
-// 				if err != nil {
-// 					log.Fatalln("error:", err)
-// 				}
-// 				a.Layers[index] = dst
-// 				getLayers(&dst.Layers)
-// 			}
-
-// 		}
-// 	}
-// }
-
-// func getLayers(l *[]interface{}) {
-// 	for index, layer := range *l {
-// 		lMap, ok := layer.(map[string]interface{})
-// 		if ok {
-// 			switch lMap["_class"] {
-// 			case "group":
-// 				group := getGroup(&lMap)
-// 				(*l)[index] = group
-// 				getLayers(&group.Layers)
-// 			case "text":
-// 				text := getText(&lMap)
-// 				(*l)[index] = text
-// 			case "symbolInstance":
-// 				symbol := getSymbol(&lMap)
-// 				(*l)[index] = symbol
-// 			}
-// 		}
-
-// 	}
-// }
 
 func getGroup(layer *map[string]interface{}) Group {
 	var result Group
