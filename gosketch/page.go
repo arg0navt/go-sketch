@@ -1,10 +1,5 @@
 package gosketch
 
-import (
-	"encoding/json"
-	"net/http"
-)
-
 //Page jsons from folder pages/
 type Page struct {
 	ObjectID              string `json:"Do_objectID"`
@@ -444,14 +439,4 @@ type SymbolMaster struct {
 	Style                            Style
 	SymbolID                         string
 	VerticalRulerData                RulerData
-}
-
-// GetLyersPage get layers elements by page
-// func (s *SketchFile) GetLyersPage(page string) []interface{} {
-// 	return s.Pages[page].Layers
-// }
-
-// GetCSS get style css by layrs page
-func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(s.Pages)
 }
