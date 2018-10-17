@@ -2,6 +2,7 @@ package gosketch
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -76,12 +77,11 @@ func getStyleArtboard(a Artboard, result *[]interface{}) {
 	newBlock.Left = a.Frame.X
 	newBlock.Top = a.Frame.Y
 	newBlock.BackgroundColor = getFormatsColor(a.BackgroundColor)
+	fmt.Println(newBlock)
 }
 
 func getFormatsColor(c Color) ColorCss {
-	r := strconv.Itoa(int(c.Red * 255))
-	g := strconv.Itoa(int(c.Green * 255))
-	b := strconv.Itoa(int(c.Blue * 255))
-	a := strconv.FormatFloat(c.Alpha, 'f', 2, 64)
-	return ColorCss{RGBA: "rgba(" + r + ", " + g + ", " + b + ", " + a + ")"}
+	rgba := "rgba(" + strconv.Itoa(int(c.Red*255)) + ", " + strconv.Itoa(int(c.Green*255)) + ", " + strconv.Itoa(int(c.Blue*255)) + ", " + strconv.FormatFloat(c.Alpha, 'f', 2, 64) + ")"
+	hex := "#" + strconv.FormatInt(int64(c.Red*255), 16) + strconv.FormatInt(int64(c.Green*255), 16) + strconv.FormatInt(int64(c.Blue*255), 16)
+	return ColorCss{RGBA: rgba, HEX: hex}
 }
