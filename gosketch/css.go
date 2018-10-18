@@ -72,9 +72,8 @@ func getStyleArtboard(a Artboard, result *[]interface{}) {
 	newBlock.Top = a.Frame.Y
 	newBlock.BorderRadius = 0
 	newBlock.BackgroundColor = getFormatsColor(a.BackgroundColor)
-	// newBlock.Shadow = ShadowCss{Enabled: false}
-	// newBlock.Border = BorderCss{Enabled: false}
 	newBlock.Shadow = getShadow(a.Style.Shadows)
+	newBlock.Border = getBorder(a.Style.Borders)
 	fmt.Println(newBlock)
 }
 
@@ -87,11 +86,25 @@ func getFormatsColor(c Color) ColorCss {
 func getShadow(s []Shadow) []string {
 	var result []string
 	for _, item := range s {
-		x := strconv.Itoa(int(item.OffsetX)) + "px "
-		y := strconv.Itoa(int(item.OffsetY)) + "px "
-		blur := strconv.Itoa(int(item.BlurRadius)) + "px "
-		color := getFormatsColor(item.Color).RGBA
-		result = append(result, x+y+blur+color)
+		if item.IsEnabled == true {
+			x := strconv.Itoa(int(item.OffsetX)) + "px "
+			y := strconv.Itoa(int(item.OffsetY)) + "px "
+			blur := strconv.Itoa(int(item.BlurRadius)) + "px "
+			color := getFormatsColor(item.Color).RGBA
+			result = append(result, x+y+blur+color)
+		}
+	}
+	return result
+}
+
+func getBorder(b []Border) []string {
+	var result []string
+	for _, item := range b {
+		if item.IsEnabled == true {
+			t := strconv.Itoa(int(item.Thickness)) + "px "
+			color := getFormatsColor(item.Color).RGBA
+			result = append(result, t+"solid "+color)
+		}
 	}
 	return result
 }
