@@ -20,9 +20,6 @@ type BlockCss struct {
 	BackgroundColor ColorCss
 	BackgroundImage string
 	BorderRadius    float64
-	BorderWidth     float64
-	BorderColor     ColorCss
-	BorderStyle     string
 
 	Children []interface{}
 }
@@ -39,15 +36,29 @@ type TextCss struct {
 	BackgroundColor ColorCss
 	BackgroundImage string
 	BorderRadius    float64
-	BorderWidth     float64
-	BorderColor     ColorCss
-	BorderStyle     string
+	Border          BorderCss
+	Shadow          ShadowCss
 	Children        []interface{}
 }
 
 type ColorCss struct {
 	HEX  string
 	RGBA string
+}
+
+type BorderCss struct {
+	Enabled     bool
+	BorderColor ColorCss
+	BorderWidth float64
+	BorderStyle string
+}
+
+type ShadowCss struct {
+	Enabled      bool
+	ShadowColor  ColorCss
+	ShadowX      float64
+	ShadowY      float64
+	ShadowRadius float64
 }
 
 func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
