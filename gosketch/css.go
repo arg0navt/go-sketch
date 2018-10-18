@@ -20,8 +20,9 @@ type BlockCss struct {
 	BackgroundColor ColorCss
 	BackgroundImage string
 	BorderRadius    float64
-
-	Children []interface{}
+	Border          []string
+	Shadow          []string
+	Children        []interface{}
 }
 
 type TextCss struct {
@@ -36,29 +37,14 @@ type TextCss struct {
 	BackgroundColor ColorCss
 	BackgroundImage string
 	BorderRadius    float64
-	Border          BorderCss
-	Shadow          ShadowCss
+	Border          []string
+	Shadow          []string
 	Children        []interface{}
 }
 
 type ColorCss struct {
 	HEX  string
 	RGBA string
-}
-
-type BorderCss struct {
-	Enabled     bool
-	BorderColor ColorCss
-	BorderWidth float64
-	BorderStyle string
-}
-
-type ShadowCss struct {
-	Enabled      bool
-	ShadowColor  ColorCss
-	ShadowX      float64
-	ShadowY      float64
-	ShadowRadius float64
 }
 
 func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
@@ -78,10 +64,6 @@ func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(s.Pages)
 }
 
-// func getStyle(layer *[]interface{}, result *[]interface{}) {
-
-// }
-
 func getStyleArtboard(a Artboard, result *[]interface{}) {
 	var newBlock BlockCss
 	newBlock.Width = a.Frame.Width
@@ -90,6 +72,9 @@ func getStyleArtboard(a Artboard, result *[]interface{}) {
 	newBlock.Top = a.Frame.Y
 	newBlock.BorderRadius = 0
 	newBlock.BackgroundColor = getFormatsColor(a.BackgroundColor)
+	// newBlock.Shadow = ShadowCss{Enabled: false}
+	// newBlock.Border = BorderCss{Enabled: false}
+	newBlock.Shadow = getShadow(a.Style.Shadows)
 	fmt.Println(newBlock)
 }
 
@@ -99,6 +84,14 @@ func getFormatsColor(c Color) ColorCss {
 	return ColorCss{RGBA: rgba, HEX: hex}
 }
 
-// func getBorder(b []Border) {
-
-// }
+func getShadow(s []Shadow) []string {
+	var result []string
+	for _, item := range s {
+		x := strconv.Itoa(int(item.OffsetX)) + "px "
+		y := strconv.Itoa(int(item.OffsetY)) + "px "
+		blur := strconv.Itoa(int(item.BlurRadius)) + "px "
+		color := getFormatsColor(item.Color).RGBA
+		result = append(result, x+y+blur+color)
+	}
+	return result
+}
