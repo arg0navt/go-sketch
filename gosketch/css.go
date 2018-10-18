@@ -23,7 +23,8 @@ type BlockCss struct {
 	BorderWidth     float64
 	BorderColor     ColorCss
 	BorderStyle     string
-	Children        []interface{}
+
+	Children []interface{}
 }
 
 type TextCss struct {
@@ -76,6 +77,7 @@ func getStyleArtboard(a Artboard, result *[]interface{}) {
 	newBlock.Height = a.Frame.Height
 	newBlock.Left = a.Frame.X
 	newBlock.Top = a.Frame.Y
+	newBlock.BorderRadius = 0
 	newBlock.BackgroundColor = getFormatsColor(a.BackgroundColor)
 	fmt.Println(newBlock)
 }
@@ -85,3 +87,7 @@ func getFormatsColor(c Color) ColorCss {
 	hex := "#" + strconv.FormatInt(int64(c.Red*255), 16) + strconv.FormatInt(int64(c.Green*255), 16) + strconv.FormatInt(int64(c.Blue*255), 16)
 	return ColorCss{RGBA: rgba, HEX: hex}
 }
+
+// func getBorder(b []Border) {
+
+// }
