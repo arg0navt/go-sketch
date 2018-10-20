@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"strings"
+	"sync"
 )
 
 //SketchFile informarions of sketch file
@@ -57,7 +58,9 @@ func Read(path string) (*SketchFile, error) {
 }
 
 func getLayers(layers *[]interface{}) error {
+	var wg sync.WaitGroup
 	for index, layer := range *layers {
+		wg.Add(1)
 		lMap, ok := layer.(map[string]interface{})
 		if ok {
 			switch lMap["_class"] {
@@ -66,21 +69,21 @@ func getLayers(layers *[]interface{}) error {
 				if err != nil {
 					return err
 				}
-				getLayers(&a.Layers)
+				go getLayers(&a.Layers)
 				(*layers)[index] = a
 			case "group":
 				g, err := getGroup(&lMap)
 				if err != nil {
 					return err
 				}
-				getLayers(&g.Layers)
+				go getLayers(&g.Layers)
 				(*layers)[index] = g
 			case "shapeGroup":
 				sG, err := getShapeGroup(&lMap)
 				if err != nil {
 					return err
 				}
-				getLayers(&sG.Layers)
+				go getLayers(&sG.Layers)
 				(*layers)[index] = sG
 			case "text":
 				t, err := getText(&lMap)
@@ -99,13 +102,14 @@ func getLayers(layers *[]interface{}) error {
 				if err != nil {
 					return err
 				}
-				getLayers(&sM.Layers)
+				go getLayers(&sM.Layers)
 				(*layers)[index] = sM
 			}
 		} else {
 			return errors.New("not type is map")
 		}
 	}
+	wg.Wait()
 	return nil
 }
 
