@@ -73,6 +73,8 @@ func getLayers(layers *[]interface{}) error {
 				getSymbolInstance(&lMap, &(*layers)[index])
 			case "symbolMaster":
 				getSymbolMaster(&lMap, &(*layers)[index])
+			case "rectangle":
+				getRectangle(&lMap, &(*layers)[index])
 			}
 		} else {
 			return errors.New("not type is map")
@@ -89,6 +91,7 @@ func getArtboard(layer *map[string]interface{}, result *interface{}) {
 		panic(err)
 	}
 	*result = r
+	getLayers(&r.Layers)
 }
 
 func getGroup(layer *map[string]interface{}, result *interface{}) {
@@ -99,6 +102,7 @@ func getGroup(layer *map[string]interface{}, result *interface{}) {
 		panic(err)
 	}
 	*result = r
+	getLayers(&r.Layers)
 }
 
 func getShapeGroup(layer *map[string]interface{}, result *interface{}) {
@@ -109,6 +113,18 @@ func getShapeGroup(layer *map[string]interface{}, result *interface{}) {
 		panic(err)
 	}
 	*result = r
+	getLayers(&r.Layers)
+}
+
+func getSymbolMaster(layer *map[string]interface{}, result *interface{}) {
+	var r SymbolMaster
+	lByte, _ := json.Marshal(layer)
+	err := json.Unmarshal(lByte, &r)
+	if err != nil {
+		panic(err)
+	}
+	*result = r
+	getLayers(&r.Layers)
 }
 
 func getText(layer *map[string]interface{}, result *interface{}) {
@@ -131,8 +147,8 @@ func getSymbolInstance(layer *map[string]interface{}, result *interface{}) {
 	*result = r
 }
 
-func getSymbolMaster(layer *map[string]interface{}, result *interface{}) {
-	var r SymbolMaster
+func getRectangle(layer *map[string]interface{}, result *interface{}) {
+	var r Rectangle
 	lByte, _ := json.Marshal(layer)
 	err := json.Unmarshal(lByte, &r)
 	if err != nil {

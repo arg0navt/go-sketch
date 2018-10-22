@@ -390,7 +390,7 @@ type Rectangle struct {
 	BooleanOperation              int
 	Edited                        bool
 	Path                          Path
-	FixedRadius                   int
+	FixedRadius                   float64
 	HasConvertedToNewRoundCorners bool
 }
 
