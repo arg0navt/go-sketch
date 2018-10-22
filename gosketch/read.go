@@ -75,6 +75,8 @@ func getLayers(layers *[]interface{}) error {
 				getSymbolMaster(&lMap, &(*layers)[index])
 			case "rectangle":
 				getRectangle(&lMap, &(*layers)[index])
+			case "shapePath":
+				getShapePath(&lMap, &(*layers)[index])
 			}
 		} else {
 			return errors.New("not type is map")
@@ -149,6 +151,16 @@ func getSymbolInstance(layer *map[string]interface{}, result *interface{}) {
 
 func getRectangle(layer *map[string]interface{}, result *interface{}) {
 	var r Rectangle
+	lByte, _ := json.Marshal(layer)
+	err := json.Unmarshal(lByte, &r)
+	if err != nil {
+		panic(err)
+	}
+	*result = r
+}
+
+func getShapePath(layer *map[string]interface{}, result *interface{}) {
+	var r ShapePath
 	lByte, _ := json.Marshal(layer)
 	err := json.Unmarshal(lByte, &r)
 	if err != nil {
