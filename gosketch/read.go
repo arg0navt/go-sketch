@@ -2,7 +2,6 @@ package gosketch
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"strings"
 )
@@ -47,124 +46,10 @@ func Read(path string) (*SketchFile, error) {
 				json.Unmarshal(byteValue, &jsonPage)
 				keyName := strings.TrimSuffix(f.Name, ".json")
 				keyName = keyName[6:]
-				getLayers(&jsonPage.Layers)
 				pagesMap[keyName] = jsonPage
 			}
 		}
 	}
 	all.Pages = pagesMap
 	return &all, nil
-}
-
-func getLayers(layers *[]interface{}) error {
-	for index, layer := range *layers {
-		lMap, ok := layer.(map[string]interface{})
-		if ok {
-			switch lMap["_class"] {
-			case "artboard":
-				getArtboard(&lMap, &(*layers)[index])
-			case "group":
-				getGroup(&lMap, &(*layers)[index])
-			case "shapeGroup":
-				getShapeGroup(&lMap, &(*layers)[index])
-			case "text":
-				getText(&lMap, &(*layers)[index])
-			case "symbolInstance":
-				getSymbolInstance(&lMap, &(*layers)[index])
-			case "symbolMaster":
-				getSymbolMaster(&lMap, &(*layers)[index])
-			case "rectangle":
-				getRectangle(&lMap, &(*layers)[index])
-			case "shapePath":
-				getShapePath(&lMap, &(*layers)[index])
-			}
-		} else {
-			return errors.New("not type is map")
-		}
-	}
-	return nil
-}
-
-func getArtboard(layer *map[string]interface{}, result *interface{}) {
-	var r Artboard
-	lByte, _ := json.Marshal(layer)
-	err := json.Unmarshal(lByte, &r)
-	if err != nil {
-		panic(err)
-	}
-	*result = r
-	getLayers(&r.Layers)
-}
-
-func getGroup(layer *map[string]interface{}, result *interface{}) {
-	var r Group
-	lByte, _ := json.Marshal(layer)
-	err := json.Unmarshal(lByte, &r)
-	if err != nil {
-		panic(err)
-	}
-	*result = r
-	getLayers(&r.Layers)
-}
-
-func getShapeGroup(layer *map[string]interface{}, result *interface{}) {
-	var r ShapeGroup
-	lByte, _ := json.Marshal(layer)
-	err := json.Unmarshal(lByte, &r)
-	if err != nil {
-		panic(err)
-	}
-	*result = r
-	getLayers(&r.Layers)
-}
-
-func getSymbolMaster(layer *map[string]interface{}, result *interface{}) {
-	var r SymbolMaster
-	lByte, _ := json.Marshal(layer)
-	err := json.Unmarshal(lByte, &r)
-	if err != nil {
-		panic(err)
-	}
-	*result = r
-	getLayers(&r.Layers)
-}
-
-func getText(layer *map[string]interface{}, result *interface{}) {
-	var r Text
-	lByte, _ := json.Marshal(layer)
-	err := json.Unmarshal(lByte, &r)
-	if err != nil {
-		panic(err)
-	}
-	*result = r
-}
-
-func getSymbolInstance(layer *map[string]interface{}, result *interface{}) {
-	var r SymbolInstance
-	lByte, _ := json.Marshal(layer)
-	err := json.Unmarshal(lByte, &r)
-	if err != nil {
-		panic(err)
-	}
-	*result = r
-}
-
-func getRectangle(layer *map[string]interface{}, result *interface{}) {
-	var r Rectangle
-	lByte, _ := json.Marshal(layer)
-	err := json.Unmarshal(lByte, &r)
-	if err != nil {
-		panic(err)
-	}
-	*result = r
-}
-
-func getShapePath(layer *map[string]interface{}, result *interface{}) {
-	var r ShapePath
-	lByte, _ := json.Marshal(layer)
-	err := json.Unmarshal(lByte, &r)
-	if err != nil {
-		panic(err)
-	}
-	*result = r
 }
