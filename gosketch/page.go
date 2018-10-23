@@ -17,7 +17,7 @@ type Page struct {
 	ShouldBreakMaskChain  bool
 	Style                 PageStyle
 	HasClickThrough       bool
-	Layers                []interface{}
+	Layers                []map[string]interface{}
 }
 
 //PageFrame jsons from folder pages/ "frame"

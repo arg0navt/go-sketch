@@ -52,11 +52,20 @@ func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
 		blocks := make([]interface{}, 0)
 		newPage := PageCss{ID: key, Css: blocks}
 		for _, item := range page.Layers {
-			fmt.Println(item)
+			checkTypeLayer(&item)
 		}
 		result = append(result, newPage)
 	}
 	json.NewEncoder(w).Encode(s.Pages)
+}
+
+func checkTypeLayer(layer *map[string]interface{}) {
+	switch (*layer)["_class"] {
+	case "artboard", "group", "shapeGroup", "symbolMaster":
+		fmt.Println("block")
+	default:
+		fmt.Println("text")
+	}
 }
 
 // func (b *BlockCss) getStyle(a *interface{}, result *[]interface{}) {
