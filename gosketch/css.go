@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 type PageCss struct {
@@ -46,6 +47,10 @@ type ColorCss struct {
 	RGBA string
 }
 
+type BackgroundColorMap struct {
+	Value map[string]interface{}
+}
+
 func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
 	var result []interface{}
 	for key, page := range s.Pages {
@@ -62,10 +67,27 @@ func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
 func checkTypeLayer(layer *map[string]interface{}) {
 	switch (*layer)["_class"] {
 	case "artboard", "group", "shapeGroup", "symbolMaster":
-		fmt.Println("block")
+		var block BlockCss
+		block.css(layer)
 	default:
 		fmt.Println("text")
 	}
+}
+
+func (block *BlockCss) css(layer *map[string]interface{}) {
+	frameM, okF := (*layer)["frame"].(map[string]interface{})
+	if okF {
+		block.Width = frameM["width"].(float64)
+		block.Height = frameM["height"].(float64)
+		block.Left = frameM["x"].(float64)
+		block.Top = frameM["y"].(float64)
+	}
+	bkgM, ok := (*layer)["backgroundColor"].(map[string]interface{})
+	if ok {
+		bkg := &BackgroundColorMap{Value: bkgM}
+		block.BackgroundColor = bkg.colorRGBA()
+	}
+	fmt.Println(block)
 }
 
 // func (b *BlockCss) getStyle(a *interface{}, result *[]interface{}) {
@@ -89,11 +111,23 @@ func checkTypeLayer(layer *map[string]interface{}) {
 // 	fmt.Println(b)
 // }
 
-// func (c *Color) getFormatsColor() ColorCss {
-// 	rgba := "rgba(" + strconv.Itoa(int(c.Red*255)) + ", " + strconv.Itoa(int(c.Green*255)) + ", " + strconv.Itoa(int(c.Blue*255)) + ", " + strconv.FormatFloat(c.Alpha, 'f', 2, 64) + ")"
-// 	hex := "#" + strconv.FormatInt(int64(c.Red*255), 16) + strconv.FormatInt(int64(c.Green*255), 16) + strconv.FormatInt(int64(c.Blue*255), 16)
-// 	return ColorCss{RGBA: rgba, HEX: hex}
-// }
+func (c *BackgroundColorMap) colorRGBA() string {
+	r := strconv.Itoa(int((*c).Value["red"].(float64) * 255))
+	g := strconv.Itoa(int((*c).Value["green"].(float64) * 255))
+	b := strconv.Itoa(int((*c).Value["blue"].(float64) * 255))
+	a := strconv.FormatFloat((*c).Value["alpha"].(float64), 'f', 2, 64)
+	return "rgba(" + r + ", " + g + ", " + b + ", " + a + ")"
+	// rgba := "rgba(" + strconv.Itoa(int(c.Red*255)) + ", " + strconv.Itoa(int(c.Green*255)) + ", " + strconv.Itoa(int(c.Blue*255)) + ", " + strconv.FormatFloat(c.Alpha, 'f', 2, 64) + ")"
+	// hex := "#" + strconv.FormatInt(int64(c.Red*255), 16) + strconv.FormatInt(int64(c.Green*255), 16) + strconv.FormatInt(int64(c.Blue*255), 16)
+	// return ColorCss{RGBA: rgba, HEX: hex}
+}
+
+func (c *BackgroundColorMap) colorHex() string {
+	h := strconv.FormatInt(int64((*c).Value["red"].(float64)*255), 16)
+	e := strconv.FormatInt(int64((*c).Value["green"].(float64)*255), 16)
+	x := strconv.FormatInt(int64((*c).Value["blue"].(float64)*255), 16)
+	return "#" + h + e + x
+}
 
 // func (s *Shadow) getShadow() (string, error) {
 // 	var result string
