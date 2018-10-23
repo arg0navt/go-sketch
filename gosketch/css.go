@@ -3,7 +3,6 @@ package gosketch
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -57,26 +56,30 @@ type MapShadow struct {
 }
 
 func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
-	var result []interface{}
+	result := make([]interface{}, 0)
 	for key, page := range s.Pages {
 		blocks := make([]interface{}, 0)
-		newPage := PageCss{ID: key, Css: blocks}
 		for _, item := range page.Layers {
-			checkTypeLayer(&item)
+			result := checkTypeLayer(&item)
+			if result != nil {
+				blocks = append(blocks, result)
+			}
 		}
-		result = append(result, newPage)
+		result = append(result, PageCss{ID: key, Css: blocks})
 	}
-	json.NewEncoder(w).Encode(s.Pages)
+	json.NewEncoder(w).Encode(result)
 }
 
-func checkTypeLayer(layer *map[string]interface{}) {
+func checkTypeLayer(layer *map[string]interface{}) interface{} {
 	switch (*layer)["_class"] {
 	case "artboard", "group", "shapeGroup", "symbolMaster":
 		var block BlockCss
 		block.css(layer)
+		return block
 	default:
-		fmt.Println("text")
+
 	}
+	return nil
 }
 
 func (block *BlockCss) css(layer *map[string]interface{}) {
@@ -89,7 +92,7 @@ func (block *BlockCss) css(layer *map[string]interface{}) {
 	}
 	bkgM, ok := (*layer)["backgroundColor"].(map[string]interface{})
 	if ok {
-		bkg := &MapColor{Value: bkgM}
+		bkg := MapColor{Value: bkgM}
 		block.BackgroundColor = bkg.colorRGBA()
 	}
 	style, ok := (*layer)["style"].(map[string]interface{})
@@ -97,7 +100,7 @@ func (block *BlockCss) css(layer *map[string]interface{}) {
 		shadowS, ok := style["shadow"].([]map[string]interface{})
 		if ok {
 			for index, item := range shadowS {
-				shd := &MapShadow{Value: item}
+				shd := MapShadow{Value: item}
 				itemShadow, err := shd.boxShadow()
 				if err == nil {
 					if index > 0 {
@@ -108,7 +111,17 @@ func (block *BlockCss) css(layer *map[string]interface{}) {
 			}
 		}
 	}
-	fmt.Println(block)
+	children := make([]interface{}, 0)
+	for _, item := range (*layer)["layers"].([]interface{}) {
+		childrenItem, ok := item.(map[string]interface{})
+		if ok {
+			result := checkTypeLayer(&childrenItem)
+			if result != nil {
+				children = append(children, result)
+			}
+		}
+	}
+	block.Children = children
 }
 
 func (c *MapColor) colorRGBA() string {
@@ -131,7 +144,7 @@ func (s *MapShadow) boxShadow() (string, error) {
 		x := strconv.Itoa(int((*s).Value["offsetX"].(float64))) + "px "
 		y := strconv.Itoa(int((*s).Value["offsetY"].(float64))) + "px "
 		blur := strconv.Itoa(int((*s).Value["blurRadius"].(float64))) + "px "
-		c := &MapColor{Value: (*s).Value["color"].(map[string]interface{})}
+		c := MapColor{Value: (*s).Value["color"].(map[string]interface{})}
 		color := c.colorRGBA()
 		return x + y + blur + color, nil
 	}
