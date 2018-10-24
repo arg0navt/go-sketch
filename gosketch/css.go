@@ -20,7 +20,7 @@ type BlockCss struct {
 	BackgroundColor string
 	BackgroundImage string
 	BorderRadius    float64
-	Border          []string
+	Borders         []string
 	BoxShadow       string
 	Children        []interface{}
 	Font            Font
@@ -85,11 +85,29 @@ func (block *BlockCss) cssBlock(layer map[string]interface{}) {
 				}
 			}
 		}
+		block.getBorders(style["borders"].([]interface{}))
 	}
 	childrenMaps, ok := layer["layers"].([]interface{})
 	if ok {
 		block.getChildren(childrenMaps)
 	}
+}
+
+func (block *BlockCss) getBorders(borders []interface{}) {
+	result := make([]string, 0)
+	for _, border := range borders {
+		border, ok := border.(map[string]interface{})
+		if ok && border["isEnabled"].(bool) {
+			width := strconv.FormatFloat(border["thickness"].(float64), 'f', 5, 64)
+			color, ok := border["color"].(map[string]interface{})
+			if ok {
+				color := MapColor{Value: color}
+				colorString := color.colorRGBA()
+				result = append(result, width+"px solid "+colorString)
+			}
+		}
+	}
+	block.Borders = result
 }
 
 func (block *BlockCss) getChildren(childrenMaps []interface{}) {
