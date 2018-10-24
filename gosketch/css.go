@@ -74,7 +74,7 @@ func checkTypeLayer(layer *map[string]interface{}) interface{} {
 	switch (*layer)["_class"] {
 	case "artboard", "group", "shapeGroup", "symbolMaster":
 		var block BlockCss
-		block.css(layer)
+		block.cssBlock(layer)
 		return block
 	default:
 
@@ -82,13 +82,10 @@ func checkTypeLayer(layer *map[string]interface{}) interface{} {
 	return nil
 }
 
-func (block *BlockCss) css(layer *map[string]interface{}) {
-	frameM, okF := (*layer)["frame"].(map[string]interface{})
+func (block *BlockCss) cssBlock(layer *map[string]interface{}) {
+	frame, okF := (*layer)["frame"].(map[string]interface{})
 	if okF {
-		block.Width = frameM["width"].(float64)
-		block.Height = frameM["height"].(float64)
-		block.Left = frameM["x"].(float64)
-		block.Top = frameM["y"].(float64)
+		block.getPosition(frame)
 	}
 	bkgM, ok := (*layer)["backgroundColor"].(map[string]interface{})
 	if ok {
@@ -122,6 +119,13 @@ func (block *BlockCss) css(layer *map[string]interface{}) {
 		}
 	}
 	block.Children = children
+}
+
+func (block *BlockCss) getPosition(frame map[string]interface{}) {
+	block.Width = frame["width"].(float64)
+	block.Height = frame["height"].(float64)
+	block.Left = frame["x"].(float64)
+	block.Top = frame["y"].(float64)
 }
 
 func (c *MapColor) colorRGBA() string {
