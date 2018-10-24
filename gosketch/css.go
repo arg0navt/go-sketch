@@ -23,7 +23,7 @@ type BlockCss struct {
 	Borders         []string
 	BoxShadow       string
 	Children        []interface{}
-	Font            Font
+	Font            interface{}
 }
 
 type Font struct {
@@ -94,6 +94,11 @@ func (block *BlockCss) cssBlock(layer map[string]interface{}) {
 	if ok {
 		block.getChildren(childrenMaps)
 	}
+	if layer["_class"] == "artboard" || layer["_class"] == "group" || layer["_class"] == "shapeGroup" || layer["_class"] == "symbolMaster" {
+		block.Font = nil
+	} else {
+		block.Font = Font{}
+	}
 }
 
 func (block *BlockCss) getBorders(borders []interface{}) {
@@ -110,7 +115,9 @@ func (block *BlockCss) getBorders(borders []interface{}) {
 			}
 		}
 	}
-	block.Borders = result
+	if len(result) > 0 {
+		block.Borders = result
+	}
 }
 
 func (block *BlockCss) getChildren(childrenMaps []interface{}) {
@@ -123,7 +130,9 @@ func (block *BlockCss) getChildren(childrenMaps []interface{}) {
 			children = append(children, block)
 		}
 	}
-	block.Children = children
+	if len(children) > 0 {
+		block.Children = children
+	}
 }
 
 func (block *BlockCss) getPosition(frame map[string]interface{}) {
