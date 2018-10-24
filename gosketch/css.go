@@ -85,7 +85,10 @@ func (block *BlockCss) cssBlock(layer map[string]interface{}) {
 				}
 			}
 		}
-		block.getBorders(style["borders"].([]interface{}))
+		borders, ok := style["borders"].([]interface{})
+		if ok {
+			block.getBorders(borders)
+		}
 	}
 	childrenMaps, ok := layer["layers"].([]interface{})
 	if ok {
@@ -98,12 +101,12 @@ func (block *BlockCss) getBorders(borders []interface{}) {
 	for _, border := range borders {
 		border, ok := border.(map[string]interface{})
 		if ok && border["isEnabled"].(bool) {
-			width := strconv.FormatFloat(border["thickness"].(float64), 'f', 5, 64)
+			width := strconv.Itoa(int(border["thickness"].(float64)))
 			color, ok := border["color"].(map[string]interface{})
 			if ok {
 				color := MapColor{Value: color}
 				colorString := color.colorRGBA()
-				result = append(result, width+"px solid "+colorString)
+				result = append(result, width+"px solid "+colorString) // TODO: only solid
 			}
 		}
 	}
