@@ -28,14 +28,9 @@ type BlockCss struct {
 
 type Font struct {
 	Size   float64
-	Color  ColorCss
+	Color  string
 	Family string
 	Weight float64
-}
-
-type ColorCss struct {
-	HEX  string
-	RGBA string
 }
 
 type MapColor struct {
