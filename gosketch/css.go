@@ -23,23 +23,14 @@ type BlockCss struct {
 	Border          []string
 	BoxShadow       string
 	Children        []interface{}
+	Font            Font
 }
 
-type TextCss struct {
-	FontSize        float64
-	FontColor       ColorCss
-	FontFamily      string
-	FontWeight      float64
-	Width           float64
-	Height          float64
-	Top             float64
-	Left            float64
-	BackgroundColor ColorCss
-	BackgroundImage string
-	BorderRadius    float64
-	Border          []string
-	BoxShadow       string
-	Children        []interface{}
+type Font struct {
+	Size   float64
+	Color  ColorCss
+	Family string
+	Weight float64
 }
 
 type ColorCss struct {
@@ -60,39 +51,26 @@ func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
 	for key, page := range s.Pages {
 		blocks := make([]interface{}, 0)
 		for _, item := range page.Layers {
-			result := checkTypeLayer(&item)
-			if result != nil {
-				blocks = append(blocks, result)
-			}
+			var block BlockCss
+			block.cssBlock(item)
+			blocks = append(blocks, block)
 		}
 		result = append(result, PageCss{ID: key, Css: blocks})
 	}
 	json.NewEncoder(w).Encode(result)
 }
 
-func checkTypeLayer(layer *map[string]interface{}) interface{} {
-	switch (*layer)["_class"] {
-	case "artboard", "group", "shapeGroup", "symbolMaster":
-		var block BlockCss
-		block.cssBlock(layer)
-		return block
-	default:
-
-	}
-	return nil
-}
-
-func (block *BlockCss) cssBlock(layer *map[string]interface{}) {
-	frame, okF := (*layer)["frame"].(map[string]interface{})
+func (block *BlockCss) cssBlock(layer map[string]interface{}) {
+	frame, okF := layer["frame"].(map[string]interface{})
 	if okF {
 		block.getPosition(frame)
 	}
-	bkgM, ok := (*layer)["backgroundColor"].(map[string]interface{})
+	bkgM, ok := layer["backgroundColor"].(map[string]interface{})
 	if ok {
 		bkg := MapColor{Value: bkgM}
 		block.BackgroundColor = bkg.colorRGBA()
 	}
-	style, ok := (*layer)["style"].(map[string]interface{})
+	style, ok := layer["style"].(map[string]interface{})
 	if ok {
 		shadowS, ok := style["shadow"].([]map[string]interface{})
 		if ok {
@@ -108,14 +86,20 @@ func (block *BlockCss) cssBlock(layer *map[string]interface{}) {
 			}
 		}
 	}
+	childrenMaps, ok := layer["layers"].([]interface{})
+	if ok {
+		block.getChildren(childrenMaps)
+	}
+}
+
+func (block *BlockCss) getChildren(childrenMaps []interface{}) {
 	children := make([]interface{}, 0)
-	for _, item := range (*layer)["layers"].([]interface{}) {
-		childrenItem, ok := item.(map[string]interface{})
+	for _, child := range childrenMaps {
+		child, ok := child.(map[string]interface{})
 		if ok {
-			result := checkTypeLayer(&childrenItem)
-			if result != nil {
-				children = append(children, result)
-			}
+			var block BlockCss
+			block.cssBlock(child)
+			children = append(children, block)
 		}
 	}
 	block.Children = children
