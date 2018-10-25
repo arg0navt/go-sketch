@@ -61,7 +61,7 @@ func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
 			select {
 			case newBranch := <-growBranch:
 				structureBranches[newBranch.Index] = newBranch.Item
-				count = count - 1
+				count = count + (newBranch.CountChildren - 1)
 				fmt.Println(count)
 			}
 		}
