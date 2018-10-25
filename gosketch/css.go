@@ -116,6 +116,8 @@ func cssBlock(layer map[string]interface{}, index int, growBranch chan<- Protoco
 	growBranch <- ProtocolWood{Item: block, Index: index}
 	if ok {
 		block.getChildren(childrenMaps, countWoods)
+	} else {
+		countWoods <- 0
 	}
 }
 
