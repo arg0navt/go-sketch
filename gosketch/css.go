@@ -3,6 +3,7 @@ package gosketch
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -45,17 +46,26 @@ func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
 	result := make([]interface{}, 0)
 	for key, page := range s.Pages {
 		blocks := make([]interface{}, 0)
+		counter := make(chan int)
+		countBranches := len(page.Layers)
 		for _, item := range page.Layers {
 			var block BlockCss
-			block.cssBlock(item)
+			go block.cssBlock(item, counter)
 			blocks = append(blocks, block)
+		}
+		for countBranches != 0 {
+			select {
+			case lenBranch := <-counter:
+				countBranches = countBranches + (lenBranch - 1)
+				fmt.Println(countBranches)
+			}
 		}
 		result = append(result, PageCss{ID: key, Css: blocks})
 	}
 	json.NewEncoder(w).Encode(result)
 }
 
-func (block *BlockCss) cssBlock(layer map[string]interface{}) {
+func (block *BlockCss) cssBlock(layer map[string]interface{}, counter chan<- int) {
 	frame, okF := layer["frame"].(map[string]interface{})
 	if okF {
 		block.getPosition(frame)
@@ -82,12 +92,12 @@ func (block *BlockCss) cssBlock(layer map[string]interface{}) {
 		}
 		borders, ok := style["borders"].([]interface{})
 		if ok {
-			block.getBorders(borders)
+			go block.getBorders(borders)
 		}
 	}
 	childrenMaps, ok := layer["layers"].([]interface{})
 	if ok {
-		block.getChildren(childrenMaps)
+		block.getChildren(childrenMaps, counter)
 	}
 	if layer["_class"] == "artboard" || layer["_class"] == "group" || layer["_class"] == "shapeGroup" || layer["_class"] == "symbolMaster" {
 		block.Font = nil
@@ -115,13 +125,14 @@ func (block *BlockCss) getBorders(borders []interface{}) {
 	}
 }
 
-func (block *BlockCss) getChildren(childrenMaps []interface{}) {
+func (block *BlockCss) getChildren(childrenMaps []interface{}, counter chan<- int) {
 	children := make([]interface{}, 0)
+	counter <- len(childrenMaps)
 	for _, child := range childrenMaps {
 		child, ok := child.(map[string]interface{})
 		if ok {
 			var block BlockCss
-			block.cssBlock(child)
+			block.cssBlock(child, counter)
 			children = append(children, block)
 		}
 	}
