@@ -42,30 +42,36 @@ type MapShadow struct {
 	Value map[string]interface{}
 }
 
+type ProtocolWood struct {
+	Item          BlockCss
+	Index         int
+	CountChildren int
+}
+
 func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
 	result := make([]interface{}, 0)
 	for key, page := range s.Pages {
-		blocks := make([]interface{}, 0)
-		counter := make(chan int)
-		countBranches := len(page.Layers)
-		for _, item := range page.Layers {
-			var block BlockCss
-			go block.cssBlock(item, counter)
-			blocks = append(blocks, block)
+		structureBranches := make([]interface{}, len(page.Layers))
+		growBranch := make(chan ProtocolWood)
+		count := len(page.Layers)
+		for index, item := range page.Layers {
+			go cssBlock(item, index, growBranch)
 		}
-		for countBranches != 0 {
+		for count > 0 {
 			select {
-			case lenBranch := <-counter:
-				countBranches = countBranches + (lenBranch - 1)
-				fmt.Println(countBranches)
+			case newBranch := <-growBranch:
+				structureBranches[newBranch.Index] = newBranch.Item
+				count = count - 1
+				fmt.Println(count)
 			}
 		}
-		result = append(result, PageCss{ID: key, Css: blocks})
+		result = append(result, PageCss{ID: key, Css: structureBranches})
 	}
 	json.NewEncoder(w).Encode(result)
 }
 
-func (block *BlockCss) cssBlock(layer map[string]interface{}, counter chan<- int) {
+func cssBlock(layer map[string]interface{}, index int, growBranch chan<- ProtocolWood) {
+	var block BlockCss
 	frame, okF := layer["frame"].(map[string]interface{})
 	if okF {
 		block.getPosition(frame)
@@ -95,15 +101,16 @@ func (block *BlockCss) cssBlock(layer map[string]interface{}, counter chan<- int
 			go block.getBorders(borders)
 		}
 	}
-	childrenMaps, ok := layer["layers"].([]interface{})
-	if ok {
-		block.getChildren(childrenMaps, counter)
-	}
 	if layer["_class"] == "artboard" || layer["_class"] == "group" || layer["_class"] == "shapeGroup" || layer["_class"] == "symbolMaster" {
 		block.Font = nil
 	} else {
 		block.Font = Font{}
 	}
+	childrenMaps, ok := layer["layers"].([]interface{})
+	growBranch <- ProtocolWood{Item: block, Index: index, CountChildren: len(childrenMaps)}
+	// if ok {
+	// 	block.getChildren(childrenMaps)
+	// }
 }
 
 func (block *BlockCss) getBorders(borders []interface{}) {
@@ -125,21 +132,18 @@ func (block *BlockCss) getBorders(borders []interface{}) {
 	}
 }
 
-func (block *BlockCss) getChildren(childrenMaps []interface{}, counter chan<- int) {
-	children := make([]interface{}, 0)
-	counter <- len(childrenMaps)
-	for _, child := range childrenMaps {
-		child, ok := child.(map[string]interface{})
-		if ok {
-			var block BlockCss
-			block.cssBlock(child, counter)
-			children = append(children, block)
-		}
-	}
-	if len(children) > 0 {
-		block.Children = children
-	}
-}
+// func (block *BlockCss) getChildren(childrenMaps []interface{}) {
+// 	children := make([]interface{}, 0)
+// 	for _, child := range childrenMaps {
+// 		child, ok := child.(map[string]interface{})
+// 		if ok {
+// 			var block BlockCss
+// 			block.cssBlock(child)
+// 			children = append(children, block)
+// 		}
+// 	}
+// 	block.Children = children
+// }
 
 func (block *BlockCss) getPosition(frame map[string]interface{}) {
 	block.Width = frame["width"].(float64)
