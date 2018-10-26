@@ -3,6 +3,7 @@ package gosketch
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -52,23 +53,25 @@ func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
 		newPage := PageCss{ID: key, CSS: make([]BlockCss, len(page.Layers))}
 		countW := len(page.Layers)
 		countWoods := make(chan int)
+		growBrancge := make(chan int)
+		count := len(page.Layers)
 		for index, item := range page.Layers {
-			go cssBlock(item, index, &newPage.CSS[index], countWoods)
+			go cssBlock(item, index, &newPage.CSS[index], countWoods, growBrancge)
 		}
 		for countW > 0 {
 			select {
 			case c := <-countWoods:
 				countW = countW + c - 1
-				if countW == 0 {
-					result = append(result, newPage)
-				}
+			case s := <-growBrancge:
+				count = count - s
 			}
 		}
+		result = append(result, newPage)
 	}
 	json.NewEncoder(w).Encode(result)
 }
 
-func cssBlock(layer map[string]interface{}, index int, block *BlockCss, countWoods chan<- int) {
+func cssBlock(layer map[string]interface{}, index int, block *BlockCss, countWoods chan<- int, growBranche chan<- int) {
 	frame, okF := layer["frame"].(map[string]interface{})
 	if okF {
 		block.getPosition(frame)
@@ -104,6 +107,7 @@ func cssBlock(layer map[string]interface{}, index int, block *BlockCss, countWoo
 		block.Font = Font{}
 	}
 	childrenMaps, ok := layer["layers"].([]interface{})
+	growBranche <- 1
 	if ok {
 		block.getChildren(childrenMaps, countWoods)
 	} else {
@@ -113,24 +117,23 @@ func cssBlock(layer map[string]interface{}, index int, block *BlockCss, countWoo
 
 func (block *BlockCss) getChildren(childrenMaps []interface{}, countWoods chan<- int) {
 	structureBranches := make([]BlockCss, len(childrenMaps))
-	growBranch := make(chan ProtocolWood)
+	growBranch := make(chan int)
 	count := len(childrenMaps)
 	countWoods <- len(childrenMaps)
 	for index, child := range childrenMaps {
 		child, ok := child.(map[string]interface{})
 		if ok {
-			go cssBlock(child, index, &structureBranches[index], countWoods)
+			go cssBlock(child, index, &structureBranches[index], countWoods, growBranch)
 		}
 	}
 	for count > 0 {
 		select {
-		case <-growBranch:
-			count = count - 1
-			if count == 0 {
-				block.Children = structureBranches
-			}
+		case s := <-growBranch:
+			count = count - s
+			fmt.Println(count)
 		}
 	}
+	block.Children = structureBranches
 }
 
 func (block *BlockCss) getBorders(borders []interface{}) {
