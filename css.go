@@ -1,9 +1,7 @@
 package gosketch
 
 import (
-	"encoding/json"
 	"errors"
-	"net/http"
 	"strconv"
 )
 
@@ -46,7 +44,7 @@ type ProtocolWood struct {
 	Index int
 }
 
-func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
+func (s *SketchFile) GetCSS() []interface{} {
 	result := make([]interface{}, 0)
 	for key, page := range s.Pages {
 		newPage := PageCss{ID: key, CSS: make([]BlockCss, len(page.Layers))}
@@ -67,7 +65,7 @@ func (s *SketchFile) GetCSS(w http.ResponseWriter, r *http.Request) {
 		}
 		result = append(result, newPage)
 	}
-	json.NewEncoder(w).Encode(result)
+	return result
 }
 
 func cssBlock(layer map[string]interface{}, index int, block *BlockCss, countWoods chan<- int, growBranche chan<- int) {
@@ -77,8 +75,7 @@ func cssBlock(layer map[string]interface{}, index int, block *BlockCss, countWoo
 	}
 	bkgM, ok := layer["backgroundColor"].(map[string]interface{})
 	if ok {
-		bkg := MapColor{Value: bkgM}
-		block.BackgroundColor = bkg.colorRGBA()
+		block.BackgroundColor = colorRGBA(bkgM)
 	}
 	style, ok := layer["style"].(map[string]interface{})
 	if ok {
@@ -142,8 +139,7 @@ func (block *BlockCss) getBorders(borders []interface{}) {
 			width := strconv.Itoa(int(border["thickness"].(float64)))
 			color, ok := border["color"].(map[string]interface{})
 			if ok {
-				color := MapColor{Value: color}
-				colorString := color.colorRGBA()
+				colorString := colorRGBA(color)
 				result = append(result, width+"px solid "+colorString) // TODO: only solid
 			}
 		}
@@ -160,18 +156,18 @@ func (block *BlockCss) getPosition(frame map[string]interface{}) {
 	block.Top = frame["y"].(float64)
 }
 
-func (c *MapColor) colorRGBA() string {
-	r := strconv.Itoa(int((*c).Value["red"].(float64) * 255))
-	g := strconv.Itoa(int((*c).Value["green"].(float64) * 255))
-	b := strconv.Itoa(int((*c).Value["blue"].(float64) * 255))
-	a := strconv.FormatFloat((*c).Value["alpha"].(float64), 'f', 2, 64)
+func colorRGBA(collorMap map[string]interface{}) string {
+	r := strconv.Itoa(int(collorMap["red"].(float64) * 255))
+	g := strconv.Itoa(int(collorMap["green"].(float64) * 255))
+	b := strconv.Itoa(int(collorMap["blue"].(float64) * 255))
+	a := strconv.FormatFloat(collorMap["alpha"].(float64), 'f', 2, 64)
 	return "rgba(" + r + ", " + g + ", " + b + ", " + a + ")"
 }
 
-func (c *MapColor) colorHex() string {
-	h := strconv.FormatInt(int64((*c).Value["red"].(float64)*255), 16)
-	e := strconv.FormatInt(int64((*c).Value["green"].(float64)*255), 16)
-	x := strconv.FormatInt(int64((*c).Value["blue"].(float64)*255), 16)
+func colorHex(collorMap map[string]interface{}) string {
+	h := strconv.FormatInt(int64(collorMap["red"].(float64)*255), 16)
+	e := strconv.FormatInt(int64(collorMap["green"].(float64)*255), 16)
+	x := strconv.FormatInt(int64(collorMap["blue"].(float64)*255), 16)
 	return "#" + h + e + x
 }
 
@@ -180,8 +176,7 @@ func (s *MapShadow) boxShadow() (string, error) {
 		x := strconv.Itoa(int((*s).Value["offsetX"].(float64))) + "px "
 		y := strconv.Itoa(int((*s).Value["offsetY"].(float64))) + "px "
 		blur := strconv.Itoa(int((*s).Value["blurRadius"].(float64))) + "px "
-		c := MapColor{Value: (*s).Value["color"].(map[string]interface{})}
-		color := c.colorRGBA()
+		color := colorRGBA((*s).Value["color"].(map[string]interface{}))
 		return x + y + blur + color, nil
 	}
 	return "", errors.New("Disabled shadow")
