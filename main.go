@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	s, err := gosketch.Read("./the-do-website-hero-templates.sketch")
+	s, err := gosketch.Read("../sketches/the-do-website-hero-templates.sketch")
 	if err != nil {
 		panic(err)
 	}
