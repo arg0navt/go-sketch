@@ -3,7 +3,6 @@ package gosketch
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -130,7 +129,6 @@ func (block *BlockCss) getChildren(childrenMaps []interface{}, countWoods chan<-
 		select {
 		case s := <-growBranch:
 			count = count - s
-			fmt.Println(count)
 		}
 	}
 	block.Children = structureBranches
