@@ -211,13 +211,13 @@ func (block *BlockCss) fontStyle(attributedString map[string]interface{}) {
 	if ok {
 		attS, ok := attS[0].(map[string]interface{})
 		if ok {
-			attrebutes, ok := attS["attrebutes"].(map[string]interface{})
+			attributes, ok := attS["attributes"].(map[string]interface{})
 			if ok {
-				color, ok := attrebutes["MSAttributedStringColorAttribute"].(map[string]interface{})
+				color, ok := attributes["MSAttributedStringColorAttribute"].(map[string]interface{})
 				if ok {
 					result.Color = colorRGBA(color)
 				}
-				fontMain, ok := attrebutes["MSAttributedStringFontAttribute"].(map[string]interface{})
+				fontMain, ok := attributes["MSAttributedStringFontAttribute"].(map[string]interface{})
 				if ok {
 					font, ok := fontMain["attributes"].(map[string]interface{})
 					if ok {
@@ -225,13 +225,17 @@ func (block *BlockCss) fontStyle(attributedString map[string]interface{}) {
 						result.Size = font["size"].(float64)
 					}
 				}
-				result.Spacing = attrebutes["kerning"].(float64)
-				paragraphStyle, ok := attrebutes["paragraphStyle"].(map[string]interface{})
+				result.Spacing = attributes["kerning"].(float64)
+				paragraphStyle, ok := attributes["paragraphStyle"].(map[string]interface{})
 				if ok {
-					result.Height = paragraphStyle["maximumLineHeight"].(float64)
+					lineHeight, ok := paragraphStyle["maximumLineHeight"].(float64)
+					if ok {
+						result.Height = lineHeight
+					}
 				}
 			}
 		}
 	}
 	result.Text = attributedString["string"].(string)
+	block.Font = result
 }
