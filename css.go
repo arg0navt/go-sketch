@@ -102,9 +102,13 @@ func cssBlock(layer map[string]interface{}, index int, block *BlockCss, countWoo
 			if ok {
 				atributeString, ok := atributeString["_archive"].(string)
 				if ok {
-					block.fontStyle(atributeString)
+					block.fontStyleBase64(atributeString)
 				}
 			}
+		}
+		encodedAttributes, ok := layer["encodedAttributes"].(map[string]interface{})
+		if ok {
+			block.fontStyle(encodedAttributes)
 		}
 	}
 	childrenMaps, ok := layer["layers"].([]interface{})
@@ -188,11 +192,29 @@ func (s *MapShadow) boxShadow() (string, error) {
 	return "", errors.New("Disabled shadow")
 }
 
-func (block *BlockCss) fontStyle(fontString string) {
+func (block *BlockCss) fontStyleBase64(fontString string) {
 	data, err := base64.StdEncoding.DecodeString(fontString)
 	if err == nil {
-		result := make(map[string]interface{})
-		json.Unmarshal(data, &result)
-		fmt.Println(result)
+		r := make([]map[string]interface{}, 0)
+		if err := json.Unmarshal(data, &r); err != nil {
+			panic(err)
+		}
+		fmt.Println(r)
+	}
+}
+
+func (block *BlockCss) fontStyle(fontMap map[string]interface{}) {
+	var result Font
+	color, ok := fontMap["MSAttributedStringColorAttribute"].(map[string]interface{})
+	if ok {
+		result.Color = colorRGBA(color)
+	}
+	font, ok := fontMap["MSAttributedStringColorAttribute"].(map[string]interface{})
+	if ok {
+		font, ok := font["attributes"].(map[string]interface{})
+		if ok {
+			result.Family = font["name"].(string)
+			result.Size = font["size"].(float64)
+		}
 	}
 }
