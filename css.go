@@ -1,7 +1,10 @@
 package gosketch
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 )
 
@@ -93,7 +96,16 @@ func cssBlock(layer map[string]interface{}, index int, block *BlockCss, countWoo
 	if layer["_class"] == "artboard" || layer["_class"] == "group" || layer["_class"] == "shapeGroup" || layer["_class"] == "symbolMaster" {
 		block.Font = nil
 	} else {
-		block.Font = Font{}
+		atributeString, ok := layer["attributedString"].(map[string]interface{})
+		if ok {
+			atributeString, ok := atributeString["archivedAttributedString"].(map[string]interface{})
+			if ok {
+				atributeString, ok := atributeString["_archive"].(string)
+				if ok {
+					block.fontStyle(atributeString)
+				}
+			}
+		}
 	}
 	childrenMaps, ok := layer["layers"].([]interface{})
 	growBranche <- 1
@@ -174,4 +186,13 @@ func (s *MapShadow) boxShadow() (string, error) {
 		return x + y + blur + color, nil
 	}
 	return "", errors.New("Disabled shadow")
+}
+
+func (block *BlockCss) fontStyle(fontString string) {
+	data, err := base64.StdEncoding.DecodeString(fontString)
+	if err == nil {
+		result := make(map[string]interface{})
+		json.Unmarshal(data, &result)
+		fmt.Println(result)
+	}
 }
