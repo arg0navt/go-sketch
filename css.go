@@ -9,8 +9,8 @@ import (
 )
 
 type PageCss struct {
-	ID  string
-	CSS []BlockCss
+	ID     string
+	Struct []BlockCss
 }
 
 type BlockCss struct {
@@ -28,10 +28,13 @@ type BlockCss struct {
 }
 
 type Font struct {
-	Size   float64
-	Color  string
-	Family string
-	Weight float64
+	Size    float64
+	Color   string
+	Family  string
+	Weight  float64
+	Spacing float64
+	Height  float64
+	Text    string
 }
 
 type MapShadow struct {
@@ -41,13 +44,13 @@ type MapShadow struct {
 func (s *SketchFile) GetCSS() []interface{} {
 	result := make([]interface{}, 0)
 	for key, page := range s.Pages {
-		newPage := PageCss{ID: key, CSS: make([]BlockCss, len(page.Layers))}
+		newPage := PageCss{ID: key, Struct: make([]BlockCss, len(page.Layers))}
 		countW := len(page.Layers)
 		countWoods := make(chan int)
 		growBrancge := make(chan int)
 		count := len(page.Layers)
 		for index, item := range page.Layers {
-			go cssBlock(item, index, &newPage.CSS[index], countWoods, growBrancge)
+			go cssBlock(item, index, &newPage.Struct[index], countWoods, growBrancge)
 		}
 		for countW > 0 {
 			select {
@@ -96,19 +99,18 @@ func cssBlock(layer map[string]interface{}, index int, block *BlockCss, countWoo
 	if layer["_class"] == "artboard" || layer["_class"] == "group" || layer["_class"] == "shapeGroup" || layer["_class"] == "symbolMaster" {
 		block.Font = nil
 	} else {
+		// if ok {
+		// 	atributeString, ok := atributeString["archivedAttributedString"].(map[string]interface{})
+		// 	if ok {
+		// 		atributeString, ok := atributeString["_archive"].(string)
+		// 		if ok {
+		// 			block.fontStyleBase64(atributeString)
+		// 		}
+		// 	}
+		// }
 		atributeString, ok := layer["attributedString"].(map[string]interface{})
 		if ok {
-			atributeString, ok := atributeString["archivedAttributedString"].(map[string]interface{})
-			if ok {
-				atributeString, ok := atributeString["_archive"].(string)
-				if ok {
-					block.fontStyleBase64(atributeString)
-				}
-			}
-		}
-		encodedAttributes, ok := layer["encodedAttributes"].(map[string]interface{})
-		if ok {
-			block.fontStyle(encodedAttributes)
+			block.fontStyle(atributeString)
 		}
 	}
 	childrenMaps, ok := layer["layers"].([]interface{})
@@ -203,18 +205,33 @@ func (block *BlockCss) fontStyleBase64(fontString string) {
 	}
 }
 
-func (block *BlockCss) fontStyle(fontMap map[string]interface{}) {
+func (block *BlockCss) fontStyle(attributedString map[string]interface{}) {
 	var result Font
-	color, ok := fontMap["MSAttributedStringColorAttribute"].(map[string]interface{})
+	attS, ok := attributedString["attributes"].([]interface{})
 	if ok {
-		result.Color = colorRGBA(color)
-	}
-	font, ok := fontMap["MSAttributedStringColorAttribute"].(map[string]interface{})
-	if ok {
-		font, ok := font["attributes"].(map[string]interface{})
+		attS, ok := attS[0].(map[string]interface{})
 		if ok {
-			result.Family = font["name"].(string)
-			result.Size = font["size"].(float64)
+			attrebutes, ok := attS["attrebutes"].(map[string]interface{})
+			if ok {
+				color, ok := attrebutes["MSAttributedStringColorAttribute"].(map[string]interface{})
+				if ok {
+					result.Color = colorRGBA(color)
+				}
+				fontMain, ok := attrebutes["MSAttributedStringFontAttribute"].(map[string]interface{})
+				if ok {
+					font, ok := fontMain["attributes"].(map[string]interface{})
+					if ok {
+						result.Family = font["name"].(string)
+						result.Size = font["size"].(float64)
+					}
+				}
+				result.Spacing = attrebutes["kerning"].(float64)
+				paragraphStyle, ok := attrebutes["paragraphStyle"].(map[string]interface{})
+				if ok {
+					result.Height = paragraphStyle["maximumLineHeight"].(float64)
+				}
+			}
 		}
 	}
+	result.Text = attributedString["string"].(string)
 }
