@@ -2,7 +2,6 @@ package gosketch
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -99,18 +98,15 @@ func cssBlock(layer map[string]interface{}, index int, block *BlockCss, countWoo
 	if layer["_class"] == "artboard" || layer["_class"] == "group" || layer["_class"] == "shapeGroup" || layer["_class"] == "symbolMaster" {
 		block.Font = nil
 	} else {
-		// if ok {
-		// 	atributeString, ok := atributeString["archivedAttributedString"].(map[string]interface{})
-		// 	if ok {
-		// 		atributeString, ok := atributeString["_archive"].(string)
-		// 		if ok {
-		// 			block.fontStyleBase64(atributeString)
-		// 		}
-		// 	}
-		// }
 		atributeString, ok := layer["attributedString"].(map[string]interface{})
 		if ok {
-			block.fontStyle(atributeString)
+			archivedAttributedString, ok := atributeString["archivedAttributedString"].(map[string]interface{})
+
+			if ok {
+				block.fontStyleBase64(archivedAttributedString["_archive"].(string))
+			} else {
+				block.fontStyle(atributeString)
+			}
 		}
 	}
 	childrenMaps, ok := layer["layers"].([]interface{})
@@ -195,14 +191,20 @@ func (s *MapShadow) boxShadow() (string, error) {
 }
 
 func (block *BlockCss) fontStyleBase64(fontString string) {
+	// data, err := base64.StdEncoding.DecodeString(fontString)
+	// if err == nil {
 	data, err := base64.StdEncoding.DecodeString(fontString)
-	if err == nil {
-		r := make([]map[string]interface{}, 0)
-		if err := json.Unmarshal(data, &r); err != nil {
-			panic(err)
-		}
-		fmt.Println(r)
+	if err != nil {
+		panic(err)
 	}
+	s := string(data)
+
+	// r := make([]map[string]interface{}, 0)
+	// if err := json.Unmarshal(data, &r); err != nil {
+	// 	panic(err)
+	// }
+	fmt.Println(s)
+
 }
 
 func (block *BlockCss) fontStyle(attributedString map[string]interface{}) {
@@ -236,6 +238,9 @@ func (block *BlockCss) fontStyle(attributedString map[string]interface{}) {
 			}
 		}
 	}
-	result.Text = attributedString["string"].(string)
+	text, ok := attributedString["string"].(string)
+	if ok {
+		result.Text = text
+	}
 	block.Font = result
 }
