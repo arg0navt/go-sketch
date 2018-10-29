@@ -31,17 +31,8 @@ type Font struct {
 	Weight float64
 }
 
-type MapColor struct {
-	Value map[string]interface{}
-}
-
 type MapShadow struct {
 	Value map[string]interface{}
-}
-
-type ProtocolWood struct {
-	Item  BlockCss
-	Index int
 }
 
 func (s *SketchFile) GetCSS() []interface{} {
@@ -63,6 +54,8 @@ func (s *SketchFile) GetCSS() []interface{} {
 				count = count - s
 			}
 		}
+		close(countWoods)
+		close(growBrancge)
 		result = append(result, newPage)
 	}
 	return result
@@ -128,6 +121,7 @@ func (block *BlockCss) getChildren(childrenMaps []interface{}, countWoods chan<-
 			count = count - s
 		}
 	}
+	close(growBranch)
 	block.Children = structureBranches
 }
 
