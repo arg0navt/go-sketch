@@ -4,7 +4,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
+
+	"github.com/DHowett/go-plist"
 )
 
 type PageCss struct {
@@ -191,20 +194,16 @@ func (s *MapShadow) boxShadow() (string, error) {
 }
 
 func (block *BlockCss) fontStyleBase64(fontString string) {
-	// data, err := base64.StdEncoding.DecodeString(fontString)
-	// if err == nil {
-	data, err := base64.StdEncoding.DecodeString(fontString)
+	b, err := base64.StdEncoding.DecodeString(fontString)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	s := string(data)
-
-	// r := make([]map[string]interface{}, 0)
-	// if err := json.Unmarshal(data, &r); err != nil {
-	// 	panic(err)
-	// }
-	fmt.Println(s)
-
+	var result interface{}
+	_, errr := plist.Unmarshal(b, &result)
+	if errr != nil {
+		log.Fatal(errr)
+	}
+	fmt.Println(result)
 }
 
 func (block *BlockCss) fontStyle(attributedString map[string]interface{}) {
