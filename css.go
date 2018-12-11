@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
 	"strconv"
 
 	"github.com/DHowett/go-plist"
@@ -203,7 +204,53 @@ func (block *BlockCss) fontStyleBase64(fontString string) {
 	if errr != nil {
 		log.Fatal(errr)
 	}
-	fmt.Println(result)
+	resultMap, ok := result.(map[string]interface{})
+	if ok {
+		findParamsFontInMap(resultMap)
+	}
+}
+
+func findParamsFontInMap(r map[string]interface{}) {
+	for key, item := range r {
+		// if key != "NS.data" {
+		// 	fmt.Println(key, ": ", item)
+		// }
+		if key == "NS.objects" {
+			b, okk := item.([]byte)
+			if okk {
+				fmt.Println("%V%", string(b))
+			}
+		}
+		switch reflect.TypeOf(item).Kind() {
+		case reflect.Slice:
+			sItem, ok := item.([]interface{})
+			if ok {
+				findParamsFontInSlice(sItem)
+			}
+		case reflect.Map:
+			resultMap, ok := item.(map[string]interface{})
+			if ok {
+				findParamsFontInMap(resultMap)
+			}
+		}
+	}
+}
+
+func findParamsFontInSlice(r []interface{}) {
+	for _, item := range r {
+		switch reflect.TypeOf(item).Kind() {
+		case reflect.Slice:
+			sItem, ok := item.([]interface{})
+			if ok {
+				findParamsFontInSlice(sItem)
+			}
+		case reflect.Map:
+			resultMap, ok := item.(map[string]interface{})
+			if ok {
+				findParamsFontInMap(resultMap)
+			}
+		}
+	}
 }
 
 func (block *BlockCss) fontStyle(attributedString map[string]interface{}) {
