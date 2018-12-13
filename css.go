@@ -5,6 +5,10 @@ import (
 	"strconv"
 )
 
+type Css struct {
+	Value []PageCss
+}
+
 type PageCss struct {
 	ID     string
 	Struct []BlockCss
@@ -38,8 +42,8 @@ type MapShadow struct {
 	Value map[string]interface{}
 }
 
-func (s *SketchFile) GetCSS() []interface{} {
-	result := make([]interface{}, 0)
+func (s *SketchFile) GetCSS() *Css {
+	result := make([]PageCss, 0)
 	for key, page := range s.Pages {
 		newPage := PageCss{ID: key, Struct: make([]BlockCss, len(page.Layers))}
 		countW := len(page.Layers)
@@ -61,7 +65,7 @@ func (s *SketchFile) GetCSS() []interface{} {
 		close(growBrancge)
 		result = append(result, newPage)
 	}
-	return result
+	return &Css{Value: result}
 }
 
 func cssBlock(layer map[string]interface{}, index int, block *BlockCss, countWoods chan<- int, growBranche chan<- int) {
