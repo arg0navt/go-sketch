@@ -38,7 +38,7 @@ func getElement(block BlockCss) string {
 	if block.Font != nil {
 		typeBlock = "span"
 	}
-	r := "<" + typeBlock + " style='width:" + strconv.FormatFloat(block.Width, 'f', 0, 64) + "px;height:" + strconv.FormatFloat(block.Height, 'f', 0, 64) + "px;" + background + "position:absolute;'>"
+	r := "<" + typeBlock + " style='top:" + strconv.FormatFloat(block.Top, 'f', 0, 64) + "px;left:" + strconv.FormatFloat(block.Left, 'f', 0, 64) + "px;width:" + strconv.FormatFloat(block.Width, 'f', 0, 64) + "px;height:" + strconv.FormatFloat(block.Height, 'f', 0, 64) + "px;" + background + "position:absolute;'>"
 	for _, item := range block.Children {
 		r = r + getElement(item)
 	}
