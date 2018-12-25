@@ -16,7 +16,7 @@ var tmpl = `<html>
 </html>
 `
 
-func (css *Css) CreateHTML(w http.ResponseWriter, r *http.Request) {
+func (css *Css) CreateHTML(w http.ResponseWriter) {
 	t := template.New("main")
 	t, _ = t.Parse(tmpl)
 	result := "<div style='position:relative;width:1000px;height:1000px'>"
