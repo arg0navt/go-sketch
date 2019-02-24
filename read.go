@@ -5,14 +5,12 @@ import (
 	"io/ioutil"
 	"strings"
 )
-
 //SketchFile informarions of sketch file
 type SketchFile struct {
 	Document Document
 	Meta     Meta
 	Pages    map[string]Page
 }
-
 // Read : It's takes information about sketch and returns json map[]
 func Read(path string) (*SketchFile, error) {
 	var all SketchFile
